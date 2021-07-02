@@ -1,5 +1,5 @@
 # orb.lua
-Partial port of orb.js into lua lang
+Partial port of [orb.js](https://github.com/lizard-isana/orb.js) into lua lang
 
 ## Sample
 ```
