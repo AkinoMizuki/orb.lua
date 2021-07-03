@@ -40,7 +40,7 @@ Orb.Time = {}
 
 -- Jurian day
 
-function Orb.Time.jd(date)
+function Orb.Time.JD(date)
   local year = date.year;
   local month = date.month;;
   local day = date.day;
@@ -60,12 +60,49 @@ function Orb.Time.jd(date)
   return julian_day + transition_offset + time_in_day;
 end
 
+function Orb.Time.JDToUTC(jd)
+  local mjd = jd - 2400000.5
+  print(mjd)
+  local mjd0 = math.floor(mjd)
+  local flac = mjd - mjd0;
+  local n = mjd0 + 678881
+  local a = 4*n + 3 + 4 * math.floor((3/4)*math.floor(((4*(n+1))/(146097))+1))
+  local b = 5 * math.floor((a%1461)/4) + 2
+  local year = math.floor(a/1461)
+  local month = math.floor(b/153) + 3
+  local day = math.floor((b%153)/5) +1
+
+  if month == 13 then
+    year = year + 1
+    month = 1
+  end
+
+  if month == 14 then
+    year = year + 1
+    month = 2
+  end  
+  local h = flac*24
+  local hour = math.floor(h)
+  local m = (h - hour)*60
+  local min = math.floor(m)
+  local sec = math.floor((m - min)*60)
+  
+  return {
+    year = year,
+    month = Orb.ZeroFill(month,2),
+    day = Orb.ZeroFill(day,2),
+    hour = Orb.ZeroFill(hour,2),
+    min = Orb.ZeroFill(min,2),
+    sec = Orb.ZeroFill(sec,2)
+  }
+end
+
 -- Greenwich Apparent Sidereal Time
 function Orb.Time.gst(date) 
   local rad = math.pi/180;
   local time_in_sec = date.hour * 3600 + date.min * 60 + date.sec
   local time_in_day = date.hour / 24 + date.min / 1440 + date.sec / 86400;
-  local jd = Orb.Time.jd(date);
+  local jd = Orb.Time.JD(date);
   local jd0 = jd - time_in_day;
 
   -- Greenwich Mean Sidereal Time(GMST) at 0:00
@@ -105,7 +142,7 @@ end
 
 function Orb.Coord.NutationAndObliquity(date)
   local rad = math.pi/180;
-  local jd = Orb.Time.jd(date)
+  local jd = Orb.Time.JD(date)
   local t = (jd - 2451545.0) / 36525;
   local omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + (t * t * t / 450000);
   local L0 = 280.4665 + 36000.7698 * t;
@@ -126,7 +163,7 @@ Orb.Sun = {}
 
 function Orb.Sun.EclipticLongitude(date)
   local rad = math.pi/180;
-  local jd = Orb.Time.jd(date)
+  local jd = Orb.Time.JD(date)
   local t = (jd - 2451545.0) / 36525;
   local mean_longitude = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
   local mean_anomaly = 357.52911 + 35999.05029 * t - 0.0001537 * t * t;
@@ -273,7 +310,7 @@ Orb.Kepler = function(date, elements)
       semi_major_axis = (elements.periapsis_distance) / (1 - eccentricity)
     end
     local mean_motion = math.sqrt(gm / (semi_major_axis * semi_major_axis * semi_major_axis)) / rad;
-    local jd = Orb.Time.jd(date)
+    local jd = Orb.Time.JD(date)
     local elapsed_time = jd - epoch;
     local mean_anomaly,l
     if (elements.mean_anomaly) then

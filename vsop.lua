@@ -4,7 +4,7 @@ local VSOP = {}
 
 VSOP.Exec = function(date,terms)
   local rad = math.pi/180;
-  local jd = Orb.Time.jd(date)
+  local jd = Orb.Time.JD(date)
   local t = ((jd - 2451545.0) / 365250);
   local vec = {0, 0, 0};
   for key,value in ipairs(terms) do

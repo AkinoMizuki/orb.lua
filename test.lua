@@ -9,8 +9,11 @@ local t = {year=2021,month=1,day=1,hour=0,min=0,sec=0}
 local utc_str = os.date('%Y-%m-%dT%H:%M:%S', os.time(t))
 print("UTC: " .. utc_str)
 
-local jd = Orb.Time.jd(t)
+local jd = Orb.Time.JD(t)
 print("JD: " .. jd)
+
+local fjd = Orb.Time.JDToUTC(jd+0.25)
+print("UTC: " .. fjd.year .. "-" .. fjd.month .. "-" .. fjd.day .. "T" .. fjd.hour .. ":" .. fjd.min .. ":" .. fjd.sec)
 
 local gst = Orb.Time.gst(t)
 print("GST: ".. gst)
