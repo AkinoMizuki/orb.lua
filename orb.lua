@@ -89,8 +89,10 @@ function Orb.Time.gst(date)
   return gast
 end
 
+Orb.Coord = {}
+
 -- Equatorial Spherical(ra,dec) to Equatorial Rectangular(x,y,z)
-function Orb.RadecToXYZ (ra_hour,dec,distance)
+function Orb.Coord.RadecToXYZ (ra_hour,dec,distance)
   local rad = math.pi/180;
   local ra_deg = ra_hour * 15;
   local vec = {
@@ -101,8 +103,7 @@ function Orb.RadecToXYZ (ra_hour,dec,distance)
   return vec
 end
 
-
-function Orb.NutationAndObliquity(date)
+function Orb.Coord.NutationAndObliquity(date)
   local rad = math.pi/180;
   local jd = Orb.Time.jd(date)
   local t = (jd - 2451545.0) / 36525;
@@ -136,7 +137,7 @@ function Orb.Sun.EclipticLongitude(date)
   local true_longitude = mean_longitude + equation;
   local true_anomary = mean_anomaly + equation;
   local radius = (1.000001018 * (1 - eccentricity * eccentricity)) / (1 + eccentricity * math.cos(true_anomary * rad));
-  local nao = Orb.NutationAndObliquity(date)
+  local nao = Orb.Coord.NutationAndObliquity(date)
   local nutation = nao.nutation;
   local obliquity = nao.obliquity;
   local apparent_longitude = true_longitude + nutation;
@@ -180,13 +181,18 @@ Orb.Planet.Jupiter = function(date)
   return Orb.VSOP.Exec(date,terms)
 end
 
-Orb.Planet.Uranus = function(date)
+Orb.Planet.Saturn = function(date)
   local terms = Orb.VSOP.Saturn();
   return Orb.VSOP.Exec(date,terms)
 end
 
+Orb.Planet.Uranus = function(date)
+  local terms = Orb.VSOP.Uranus();
+  return Orb.VSOP.Exec(date,terms)
+end
+
 Orb.Planet.Neptune = function(date)
-  local terms = Orb.VSOP.Saturn();
+  local terms = Orb.VSOP.Neptune();
   return Orb.VSOP.Exec(date,terms)
 end
 
@@ -221,7 +227,7 @@ Orb.EclipticToEquatorial = function (date,vec)
   local gcx = ecliptic.x - ep.x;
   local gcy = ecliptic.y - ep.y;
   local gcz = ecliptic.z - ep.z;
-  local nao = Orb.NutationAndObliquity(date)
+  local nao = Orb.Coord.NutationAndObliquity(date)
   local ecl = nao.obliquity
   local equatorial = {
     x = gcx,
@@ -234,6 +240,106 @@ Orb.EclipticToEquatorial = function (date,vec)
     z = equatorial.z,
     date = date
   }
+end
+
+
+Orb.Kepler = function(date, elements)
+  local gm
+  if (elements.gm) then
+    gm = elements.gm;
+  else
+    gm = 2.9591220828559093*math.pow(10,-4);
+  end
+
+  local epoch
+  if (elements.time_of_periapsis) then
+    epoch = elements.time_of_periapsis;
+  else
+    epoch = elements.epoch;
+  end
+
+  if (elements.perihelion_distance) then
+    elements.periapsis_distance = elements.perihelion_distance;
+  end
+  
+  local rad = math.pi/180
+
+  local EllipticalOrbit = function ()
+    local eccentricity = elements.eccentricity;
+    local semi_major_axis
+    if (elements.semi_major_axis) then
+      semi_major_axis = elements.semi_major_axis;
+    elseif (elements.periapsis_distance) then
+      semi_major_axis = (elements.periapsis_distance) / (1 - eccentricity)
+    end
+    local mean_motion = math.sqrt(gm / (semi_major_axis * semi_major_axis * semi_major_axis)) / rad;
+    local jd = Orb.Time.jd(date)
+    local elapsed_time = jd - epoch;
+    local mean_anomaly,l
+    if (elements.mean_anomaly) then
+      mean_anomaly = elements.mean_anomaly;
+      l = (mean_motion * elapsed_time) + mean_anomaly;
+    elseif(elements.time_of_periapsis) then
+      mean_anomaly = mean_motion * elapsed_time;
+      l = mean_anomaly;
+    end
+    if (l > 360) then
+      l = l % 360
+    end
+    l = l * rad
+    local u = l
+    local i = 0;
+    local ut,delta_u
+    repeat
+      ut = u;
+      delta_u = (l - u + (eccentricity * math.sin(u))) / (1 - (eccentricity * math.cos(u)));
+      u = u + delta_u;
+      if (i > 1000000) then 
+        break;
+      end
+      i = i+1;
+    until (math.abs(ut - u) > 0.0000001) 
+    local eccentric_anomaly = u;
+    local p = math.abs(semi_major_axis * (1 - eccentricity * eccentricity))
+    local true_anomaly = 2 * math.atan(math.sqrt((1 + eccentricity) / (1 - eccentricity)) * math.tan(eccentric_anomaly / 2));
+    local r = p / (1 + eccentricity * math.cos(true_anomaly));
+    local orbital_plane = {
+      r = r,
+      x = r * math.cos(true_anomaly),
+      y = r * math.sin(true_anomaly),
+      xdot = -math.sqrt(gm / p) * math.sin(true_anomaly),
+      ydot = math.sqrt(gm / p) * (eccentricity + math.cos(true_anomaly))
+    };
+    return orbital_plane
+  end
+  
+  local orbital_plane = EllipticalOrbit()
+
+  EclipticRectangular = function ()
+    local lan = elements.longitude_of_ascending_node * rad;
+    local ap = elements.argument_of_periapsis * rad;
+    local inc = elements.inclination * rad;
+    local op2xyz = function (opx, opy, lan, ap, inc)
+      return {
+        x = opx * (math.cos(lan) * math.cos(ap) - math.sin(lan) * math.cos(inc) * math.sin(ap)) - opy * (math.cos(lan) * math.sin(ap) + math.sin(lan) * math.cos(inc) * math.cos(ap)),
+        y = opx * (math.sin(lan) * math.cos(ap) + math.cos(lan) * math.cos(inc) * math.sin(ap)) - opy * (math.sin(lan) * math.sin(ap) - math.cos(lan) * math.cos(inc) * math.cos(ap)),
+        z = opx * math.sin(inc) * math.sin(ap) + opy * math.sin(inc) * math.cos(ap)
+      }
+    end
+    local vec = op2xyz(orbital_plane.x, orbital_plane.y, lan, ap, inc)
+    local dotvec = op2xyz(orbital_plane.xdot, orbital_plane.ydot, lan, ap, inc)
+    return {
+      x = vec.x,
+      y = vec.y,
+      z = vec.z,
+      xdot = dotvec.x,
+      ydot = dotvec.y,
+      zdot = dotvec.z
+    };
+  end
+
+  local xyz = EclipticRectangular()
+  return xyz
 end
 
 Orb.Observe = {}
@@ -263,7 +369,6 @@ Orb.Observe.LatLngToRect = function(date,latlng)
   }
 end
 
-
 Orb.Observe.RadecToHorizontal = function(date,radec,observer)
   local rad = math.pi/180
   local ra = radec.ra;
@@ -280,7 +385,6 @@ Orb.Observe.RadecToHorizontal = function(date,radec,observer)
   local azimuth = (math.atan2(-math.cos(dec)*math.sin(h),math.sin(dec)*math.cos(lat)-math.cos(dec)*math.sin(lat)*math.cos(h)))/rad;
   azimuth = Orb.RoundNum(azimuth,360)
   local elevation = (math.asin(math.sin(dec)*math.sin(lat)+math.cos(lat)*math.cos(dec)*math.cos(h)))/rad;
-  print(elevation)
   local atmospheric_refraction = Orb.Observe.AtmosphericRefraction(elevation)
   if (azimuth<0) then
     azimuth = azimuth%360 + 360
@@ -295,7 +399,6 @@ end
 
 Orb.Observe.RectToHorizontal = function(date,rect,observer)
   local rad = math.pi/180
-  print(observer)
   local lat = observer.latitude;
   local lng = observer.longitude;
   local ob = Orb.Observe.LatLngToRect(date,observer)
