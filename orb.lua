@@ -129,7 +129,7 @@ end
 Orb.Coord = {}
 
 -- Equatorial Spherical(ra,dec) to Equatorial Rectangular(x,y,z)
-function Orb.Coord.RadecToXYZ (ra_hour,dec,distance)
+Orb.Coord.RadecToEquatorial = function(ra_hour,dec,distance)
   local rad = math.pi/180;
   local ra_deg = ra_hour * 15;
   local vec = {
@@ -139,6 +139,32 @@ function Orb.Coord.RadecToXYZ (ra_hour,dec,distance)
   }
   return vec
 end
+
+
+Orb.Coord.EquatorialToRadec = function (date,rect) 
+  -- equatorial rectangular(x,y,z) to spherical(ra,dec)
+  local rad = math.pi/180;
+  local eqx = rect.x;
+  local eqy = rect.y;
+  local eqz = rect.z;
+  local ra = math.atan2(eqy, eqx) / rad;
+  if (ra < 0)  then
+    ra = ra % 360 + 360
+  end
+  if (ra > 360) then
+    ra = ra % 360
+  end
+  ra = ra / 15
+  local dec = math.atan2(eqz, math.sqrt(eqx * eqx + eqy * eqy)) / rad;
+  local distance = math.sqrt(eqx * eqx + eqy * eqy + eqz * eqz);
+  return {
+    ra = ra,
+    dec = dec,
+    distance = distance,
+    date = date
+  };
+end
+
 
 function Orb.Coord.NutationAndObliquity(date)
   local rad = math.pi/180;
@@ -237,7 +263,7 @@ end
 -- Coordnate Conversion
 
 
-Orb.EquatorialToEcliptic = function (date,vec) 
+Orb.Coord.EquatorialToEcliptic = function (date,vec) 
   -- equatorial rectangular(x,y,z) to ecliptic rectangular(x,y,z)
   local rad = math.pi/180;
   local nao = Orb.NutationAndObliquity(date)
@@ -256,7 +282,7 @@ Orb.EquatorialToEcliptic = function (date,vec)
   }
 end
 
-Orb.EclipticToEquatorial = function (date,vec) 
+Orb.Coord.EclipticToEquatorial = function (date,vec) 
   -- ecliptic rectangular(x,y,z) to equatorial rectangular(x,y,z)
   local rad = math.pi/180
   local ecliptic = vec
@@ -434,33 +460,17 @@ Orb.Observe.RadecToHorizontal = function(date,radec,observer)
    }
 end
 
-Orb.Observe.RectToHorizontal = function(date,rect,observer)
-  local rad = math.pi/180
-  local lat = observer.latitude;
-  local lng = observer.longitude;
-  local ob = Orb.Observe.LatLngToRect(date,observer)
-  local rx0 = rect.x - ob.x;
-  local ry0 = rect.y - ob.y
-  local rz0 = rect.z - ob.z
-  local gst = Orb.Time.gst(date);
-  local lst = gst*15 + lng;
-  local rs = math.sin(lat*rad)*math.cos(lst*rad)*rx0 + math.sin(lat*rad)*math.sin(lst*rad)*ry0-math.cos(lat*rad)*rz0;
-  local re = -math.sin(lst*rad)*rx0 + math.cos(lst*rad)*ry0;
-  local rz = math.cos(lat*rad)*math.cos(lst*rad)*rx0+math.cos(lat*rad)*math.sin(lst*rad)*ry0 + math.sin(lat*rad)*rz0;
-  local range = math.sqrt(rs*rs+re*re+rz*rz);
-  local elevation = math.asin(rz/range)/rad;
-  local atmospheric_refraction = Orb.Observe.AtmosphericRefraction(elevation)
-  local azimuth  = math.atan2(-re,rs);
-  azimuth = azimuth/rad+180;
-  if (azimuth>360) then
-    azimuth = azimuth%360;
-  end
-  return {
-  azimuth = azimuth,
-  elevation = elevation + atmospheric_refraction,
-  distance = range,
-  atmospheric_refraction = atmospheric_refraction
- }
+Orb.Observe.EclipticToHorizontal = function(date,ecliptic,observer)
+  local equatorial = Orb.Coord.EclipticToEquatorial(date,ecliptic)
+  local radec = Orb.Coord.EquatorialToRadec(date,equatorial)
+  local horizontal = Orb.Observe.RadecToHorizontal(date,radec,observer)
+  return horizontal
+end
+
+Orb.Observe.EquatorialToHorizontal = function(date,equatorial,observer)
+  local radec = Orb.Coord.EquatorialToRadec(date,equatorial)
+  local horizontal = Orb.Observe.RadecToHorizontal(date,radec,observer)
+  return horizontal
 end
  
 return Orb
