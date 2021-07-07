@@ -15,7 +15,7 @@ print("UTC: " .. utc_str)
 local jd = Orb.Time.JD(t)
 print("JD: " .. jd)
 
-local fjd = Orb.Time.JDToUTC(jd+0.25)
+local fjd = Orb.Time.JDToUTC(jd)
 print("UTC: " .. fjd.year .. "-" .. fjd.month .. "-" .. fjd.day .. "T" .. fjd.hour .. ":" .. fjd.min .. ":" .. fjd.sec)
 
 local gst = Orb.Time.gst(t)
@@ -113,21 +113,34 @@ print("Phobos(horizontal)\n azimuth:" .. phobos_horizontal.azimuth .. ", elevati
 
 local pluto_elements = {
   gm = 2.9591220828411951E-04,
-  eccentricity = 2.515592767106864E-01,
-  inclination = 1.729107375790253E+01,
-  longitude_of_ascending_node = 1.103546798589673E+02,
-  argument_of_periapsis = 1.141843508986021E+02,
-  time_of_periapsis = 2447879.317561375909,
-  semi_major_axis = 3.965028049001756E+01
+  eccentricity = 0.2519446,
+  inclination = 17.09860,
+  longitude_of_ascending_node = 110.29702,
+  argument_of_periapsis = 115.37952,
+  time_of_periapsis = 2448031.24959,
+  semi_major_axis = 39.8362800
 }
 local pluto_ecliptic = Orb.Kepler(t,pluto_elements);
 print("Pluto(ecliptic)\n x:" .. pluto_ecliptic.x .. "au, y:" .. pluto_ecliptic.y .. "au, z:" .. pluto_ecliptic.z .. "km")
-
-local pluto_ecliptic = Orb.Kepler(t,pluto_elements);
 
 local pluto_equatorial = Orb.Coord.EclipticToEquatorial(t,pluto_ecliptic)
 print("Pluto(equatorial)\n x:" .. pluto_equatorial.x .. ", y: " .. pluto_equatorial.y .. ", z: " .. pluto_equatorial.z)
 
 local pluto_horizontal = Orb.Observe.EclipticToHorizontal(t,pluto_ecliptic,observer)
 print("Pluto(horizontal)\n azimuth:" .. pluto_horizontal.azimuth .. ", elevation: " .. pluto_horizontal.elevation .. ", distance: " .. pluto_horizontal.distance)
+
+
+Orb.Moon = require("luna")
+
+local moon_equatorial = Orb.Moon.Equatorial(t)
+print("Moon(equatorial)\n  x:" .. moon_equatorial.x .. ", y: " .. moon_equatorial.y .. ", z: " .. moon_equatorial.z)
+
+local moon_ecliptic = Orb.Moon.Ecliptic(t)
+print("Moon(ecliptic)\n  x:" .. moon_ecliptic.x .. ", y: " .. moon_ecliptic.y .. ", z: " .. moon_ecliptic.z)
+
+local moon_radec = Orb.Moon.RaDec(t)
+print("Moon(radec)\n  ra:" .. moon_radec.ra .. ", dec: " .. moon_radec.dec .. ", distance: " .. moon_radec.distance)
+
+local moon_horizontal = Orb.Moon.Horizontal(t,observer)
+print("Moon(horizontal)\n  azimuth:" .. moon_horizontal.azimuth .. ", elevation: " .. moon_horizontal.elevation .. ", distance: " .. moon_horizontal.distance)
 

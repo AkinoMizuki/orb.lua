@@ -16,6 +16,10 @@ function Orb.RoundNum(num,max)
   return results;
 end
 
+function Orb.RoundAngle(num)
+ return Orb.RoundNum(num,360)
+end
+
 function Orb.ZeroFill(num, length) 
   if (length)  then
     length = length;
@@ -40,7 +44,6 @@ end
 Orb.Time = {}
 
 -- Jurian day
-
 function Orb.Time.JD(date)
   local year = date.year;
   local month = date.month;;
@@ -166,108 +169,10 @@ Orb.Coord.EquatorialToRadec = function (date,rect)
   };
 end
 
-
-function Orb.Coord.NutationAndObliquity(date)
-  local rad = math.pi/180;
-  local jd = Orb.Time.JD(date)
-  local t = (jd - 2451545.0) / 36525;
-  local omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + (t * t * t / 450000);
-  local L0 = 280.4665 + 36000.7698 * t;
-  local L1 = 218.3165 + 481267.8813 * t;
-  local nutation = (-17.20 / 3600) * math.sin(omega * rad) - (-1.32 / 3600) * math.sin(2 * L0 * rad) - (0.23 / 3600) * math.sin(2 * L1 * rad) + (0.21 / 3600) * math.sin(2 * omega * rad);
-  local mean_obliquity = 23 + 26.0 / 60 + 21.448 / 3600 - (46.8150 / 3600) * t - (0.00059 / 3600) * t * t + (0.001813 / 3600) * t * t * t;
-  local obliquity_delta = (9.20 / 3600) * math.cos(omega * rad) + (0.57 / 3600) * math.cos(2 * L0 * rad) + (0.10 / 3600) * math.cos(2 * L1 * rad) - (0.09 / 3600) * math.cos(2 * omega * rad);
-  local obliquity = mean_obliquity + obliquity_delta;
-  return {
-    nutation = nutation,
-    obliquity = obliquity
-  }
-end
-
--- Sun
-
-Orb.Sun = {}
-
-function Orb.Sun.EclipticLongitude(date)
-  local rad = math.pi/180;
-  local jd = Orb.Time.JD(date)
-  local t = (jd - 2451545.0) / 36525;
-  local mean_longitude = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
-  local mean_anomaly = 357.52911 + 35999.05029 * t - 0.0001537 * t * t;
-  local eccentricity = 0.016708634 - 0.000042037 * t - 0.0000001267 * t * t;
-  local equation = (1.914602 - 0.004817 * t - 0.000014 * t * t) * math.sin(mean_anomaly * rad);
-  equation = equation + (0.019993 - 0.000101 * t) * math.sin(2 * mean_anomaly * rad);
-  equation = equation + 0.000289 * math.sin(3 * mean_anomaly * rad);
-  local true_longitude = mean_longitude + equation;
-  local true_anomary = mean_anomaly + equation;
-  local radius = (1.000001018 * (1 - eccentricity * eccentricity)) / (1 + eccentricity * math.cos(true_anomary * rad));
-  local nao = Orb.Coord.NutationAndObliquity(date)
-  local nutation = nao.nutation;
-  local obliquity = nao.obliquity;
-  local apparent_longitude = true_longitude + nutation;
-  local longitude = apparent_longitude;
-  local distance = radius * 149597870.691;
-  return {
-    longitude = longitude,
-    distance = distance,
-    obliquity = obliquity
-  }
-end
-
--- planets
-
-Orb.VSOP = require("vsop")
-
-Orb.Planet = {}
-
-Orb.Planet.Mercury = function(date)
-  local terms = Orb.VSOP.Mercury();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Venus = function(date)
-  local terms = Orb.VSOP.Venus();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Earth = function(date)
-  local terms = Orb.VSOP.Earth();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Mars = function(date)
-  local terms = Orb.VSOP.Mars();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Jupiter = function(date)
-  local terms = Orb.VSOP.Jupiter();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Saturn = function(date)
-  local terms = Orb.VSOP.Saturn();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Uranus = function(date)
-  local terms = Orb.VSOP.Uranus();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-Orb.Planet.Neptune = function(date)
-  local terms = Orb.VSOP.Neptune();
-  return Orb.VSOP.Exec(date,terms)
-end
-
-
--- Coordnate Conversion
-
-
 Orb.Coord.EquatorialToEcliptic = function (date,vec) 
   -- equatorial rectangular(x,y,z) to ecliptic rectangular(x,y,z)
   local rad = math.pi/180;
-  local nao = Orb.NutationAndObliquity(date)
+  local nao = Orb.Coord.NutationAndObliquity(date)
   local obliquity = nao.obliquity
   local equatorial = vec
   local ecliptic = {
@@ -306,6 +211,25 @@ Orb.Coord.EclipticToEquatorial = function (date,vec)
   }
 end
 
+
+function Orb.Coord.NutationAndObliquity(date)
+  local rad = math.pi/180;
+  local jd = Orb.Time.JD(date)
+  local t = (jd - 2451545.0) / 36525;
+  local omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + (t * t * t / 450000);
+  local L0 = 280.4665 + 36000.7698 * t;
+  local L1 = 218.3165 + 481267.8813 * t;
+  local nutation = (-17.20 / 3600) * math.sin(omega * rad) - (-1.32 / 3600) * math.sin(2 * L0 * rad) - (0.23 / 3600) * math.sin(2 * L1 * rad) + (0.21 / 3600) * math.sin(2 * omega * rad);
+  local mean_obliquity = 23 + 26.0 / 60 + 21.448 / 3600 - (46.8150 / 3600) * t - (0.00059 / 3600) * t * t + (0.001813 / 3600) * t * t * t;
+  local obliquity_delta = (9.20 / 3600) * math.cos(omega * rad) + (0.57 / 3600) * math.cos(2 * L0 * rad) + (0.10 / 3600) * math.cos(2 * L1 * rad) - (0.09 / 3600) * math.cos(2 * omega * rad);
+  local obliquity = mean_obliquity + obliquity_delta;
+  return {
+    nutation = nutation,
+    obliquity = obliquity
+  }
+end
+
+-- Kepler orbit
 
 Orb.Kepler = function(date, elements)
   local gm
@@ -474,4 +398,309 @@ Orb.Observe.EquatorialToHorizontal = function(date,equatorial,observer)
   return horizontal
 end
  
+
+
+
+-- Sun
+
+Orb.Sun = {}
+
+function Orb.Sun.EclipticLongitude(date)
+  local rad = math.pi/180;
+  local jd = Orb.Time.JD(date)
+  local t = (jd - 2451545.0) / 36525;
+  local mean_longitude = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
+  local mean_anomaly = 357.52911 + 35999.05029 * t - 0.0001537 * t * t;
+  local eccentricity = 0.016708634 - 0.000042037 * t - 0.0000001267 * t * t;
+  local equation = (1.914602 - 0.004817 * t - 0.000014 * t * t) * math.sin(mean_anomaly * rad);
+  equation = equation + (0.019993 - 0.000101 * t) * math.sin(2 * mean_anomaly * rad);
+  equation = equation + 0.000289 * math.sin(3 * mean_anomaly * rad);
+  local true_longitude = mean_longitude + equation;
+  local true_anomary = mean_anomaly + equation;
+  local radius = (1.000001018 * (1 - eccentricity * eccentricity)) / (1 + eccentricity * math.cos(true_anomary * rad));
+  local nao = Orb.Coord.NutationAndObliquity(date)
+  local nutation = nao.nutation;
+  local obliquity = nao.obliquity;
+  local apparent_longitude = true_longitude + nutation;
+  local longitude = apparent_longitude;
+  local distance = radius * 149597870.691;
+  return {
+    longitude = longitude,
+    distance = distance,
+    obliquity = obliquity
+  }
+end
+
+Orb.Sun.SphericalToRectangler = function (spherical)
+  local rad = math.pi/180;
+  local longitude = spherical.longitude;
+  local distance = spherical.distance;
+  local obliquity = spherical.obliquity;
+  return {
+    x = distance * math.cos(longitude * rad),
+    y = distance * (math.sin(longitude * rad) * math.cos(obliquity * rad)),
+    z = distance * (math.sin(longitude * rad) * math.sin(obliquity * rad))
+  }
+end
+
+Orb.Sun.EclipticToEquatorial = function (ecliptic)
+  local rad = math.pi/180;
+  local longitude = ecliptic.longitude
+  local distance = ecliptic.distance
+  local obliquity = ecliptic.obliquity
+  local ra = math.atan2(math.cos(obliquity * rad) * math.sin(longitude * rad), math.cos(longitude * rad))
+  ra = Orb.RoundNum(ra/rad,360)
+  ra = ra / 15
+  local dec = math.asin(math.sin(obliquity * rad) * math.sin(longitude * rad));
+  dec = dec / rad;
+  return {
+    ra = ra,
+    dec = dec,
+    distance = distance
+  }
+end
+
+Orb.Sun.Radec = function(date)
+  local ecliptic = Orb.Sun.EclipticLongitude(date)
+  local radec = Orb.Sun.EclipticToEquatorial(ecliptic)
+  return radec
+end
+
+Orb.Sun.Equatorial = function(date)
+  local ecliptic = Orb.Sun.EclipticLongitude(date)
+  local rect = Orb.Sun.SphericalToRectangler(ecliptic)
+  return rect
+end
+
+Orb.Sun.Ecliptic = function(date)
+  return {x=0,y=0,z=0}
+end
+
+Orb.Sun.Horizontal = function(date,observer)
+  local radec = Orb.Sun.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+
+-- Moon
+
+Orb.Moon = require("luna")
+
+Orb.Moon.Equatorial = function(date)
+  return Orb.Moon.xyz(date)
+end
+
+Orb.Moon.Ecliptic = function(date)
+  local luna_equatorial = Orb.Moon.xyz(date)
+  return Orb.Coord.EquatorialToEcliptic(date,luna_equatorial)
+end
+
+Orb.Moon.RaDec = function(date)
+  return Orb.Moon.radec(date)
+end
+
+Orb.Moon.Horizontal = function(date,observer)
+  local radec = Orb.Moon.radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+
+-- planets
+
+Orb.VSOP = require("vsop")
+
+Orb.Planet = {}
+
+Orb.Planet.Mercury = function(date)
+  local terms = Orb.VSOP.Mercury();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Mercury = {}
+Orb.Mercury.Ecliptic = function(date)
+    return Orb.Planet.Mercury(date)
+end
+Orb.Mercury.Equatorial = function(date)
+  local ecliptic = Orb.Mercury.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Mercury.Radec = function(date)
+  local equatorial = Orb.Mercury.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Mercury.Horizontal = function(date)
+  local radec = Orb.Mercury.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Venus = function(date)
+  local terms = Orb.VSOP.Venus();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Venus = {}
+Orb.Venus.Ecliptic = function(date)
+    return Orb.Planet.Venus(date)
+end
+Orb.Venus.Equatorial = function(date)
+  local ecliptic = Orb.Venus.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Venus.Radec = function(date)
+  local equatorial = Orb.Venus.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Venus.Horizontal = function(date)
+  local radec = Orb.Venus.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Earth = function(date)
+  local terms = Orb.VSOP.Earth();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Earth = {}
+Orb.Earth.Ecliptic = function(date)
+  return Orb.Earth.Venus(date)
+end
+Orb.Earth.Equatorial = function(date)
+  return {x=0,y=0,z=0}
+end
+Orb.Earth.Radec = function()
+  return nil
+end
+Orb.Earth.Horizontal = function()
+  return nil
+end
+
+Orb.Planet.Mars = function(date)
+  local terms = Orb.VSOP.Mars();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Mars = {}
+Orb.Mars.Ecliptic = function(date)
+    return Orb.Planet.Mars(date)
+end
+Orb.Mars.Equatorial = function(date)
+  local ecliptic = Orb.Mars.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Mars.Radec = function(date)
+  local equatorial = Orb.Mars.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Mars.Horizontal = function(date)
+  local radec = Orb.Mars.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Jupiter = function(date)
+  local terms = Orb.VSOP.Jupiter();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Jupiter = {}
+Orb.Jupiter.Ecliptic = function(date)
+    return Orb.Planet.Jupiter(date)
+end
+Orb.Jupiter.Equatorial = function(date)
+  local ecliptic = Orb.Jupiter.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Jupiter.Radec = function(date)
+  local equatorial = Orb.Jupiter.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Jupiter.Horizontal = function(date)
+  local radec = Orb.Jupiter.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Saturn = function(date)
+  local terms = Orb.VSOP.Saturn();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Saturn = {}
+Orb.Saturn.Ecliptic = function(date)
+    return Orb.Planet.Saturn(date)
+end
+Orb.Saturn.Equatorial = function(date)
+  local ecliptic = Orb.Saturn.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Saturn.Radec = function(date)
+  local equatorial = Orb.Saturn.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Saturn.Horizontal = function(date)
+  local radec = Orb.Saturn.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Uranus = function(date)
+  local terms = Orb.VSOP.Uranus();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Uranus = {}
+Orb.Uranus.Ecliptic = function(date)
+    return Orb.Planet.Uranus(date)
+end
+Orb.Uranus.Equatorial = function(date)
+  local ecliptic = Orb.Uranus.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Uranus.Radec = function(date)
+  local equatorial = Orb.Uranus.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Uranus.Horizontal = function(date)
+  local radec = Orb.Uranus.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Planet.Neptune = function(date)
+  local terms = Orb.VSOP.Neptune();
+  return Orb.VSOP.Exec(date,terms)
+end
+
+Orb.Neptune = {}
+Orb.Neptune.Ecliptic = function(date)
+    return Orb.Planet.Neptune(date)
+end
+Orb.Neptune.Equatorial = function(date)
+  local ecliptic = Orb.Neptune.Ecliptic (date)
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic)
+end
+Orb.Neptune.Radec = function(date)
+  local equatorial = Orb.Neptune.Equatorial (date)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Neptune.Horizontal = function(date)
+  local radec = Orb.Neptune.Radec(date)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
+Orb.Asteroid = {}
+
+Orb.Asteroid.Ecliptic = function(date,elements)
+  return Orb.Kepler(date,elements);
+end
+
+Orb.Asteroid.Equatorial = function(date,elements)
+  local ecliptic = Orb.Kepler(date,elements);
+  return Orb.Coord.EclipticToEquatorial(date,ecliptic);
+end
+Orb.Asteroid.Radec = function(date,elements)
+  local equatorial = Orb.Asteroid.Equatorial(date,elements)
+  return  Orb.Coord.EquatorialToRadec(date,equatorial)
+end
+Orb.Asteroid.Horizontal = function(date,elements,observer)
+  local radec = Orb.Asteroid.Radec(date,elements)
+  return Orb.Observe.RadecToHorizontal(date,radec,observer)
+end
+
 return Orb
