@@ -1,11 +1,12 @@
 -- vsop 89 theory terms for orb.lua
--- update 2021-07-05 01:00 JST
+-- update 2021-07-10 01:00 JST
 
 local VSOP = {}
 
 VSOP.Exec = function(date,terms)
   local rad = math.pi/180;
-  local jd = Orb.Time.JD(date)
+  local tt = Orb.Time.TT(date);
+  local jd = Orb.Time.JD(tt);
   local t = ((jd - 2451545.0) / 365250);
   local vec = {0, 0, 0};
   for key,value in ipairs(terms) do

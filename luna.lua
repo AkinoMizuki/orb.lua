@@ -1,12 +1,12 @@
---luna.js
---require core.js, time.js, earth.js
+-- update 2021-07-10 01:00 JST
 
 local Luna = {}
 
 Luna.latlng =  function (date)
   local rad = math.pi/180;
   local deg = 180 / math.pi;
-  local jd = Orb.Time.JD(date)
+  local tt = Orb.Time.TT(date);
+  local jd = Orb.Time.JD(tt);
 
   --ephemeris days from the epch J2000.0
   local t = (jd - 2451545.0) / 36525;
@@ -124,38 +124,29 @@ Luna.latlng =  function (date)
   }
 end
 
-Luna.radec = function (date)
+Luna.equatorial = function (date)
     local latlng = Luna.latlng(date);
     local rad = math.pi/180;
     local latitude = latlng.latitude
     local longitude = latlng.longitude
     local distance = latlng.distance
     local obliquity = latlng.obliquity
-    local ra = math.atan2(math.sin(longitude * rad) * math.cos(obliquity * rad) - math.tan(latitude * rad) * math.sin(obliquity * rad), math.cos(longitude * rad)) / rad;
-    ra = Orb.RoundAngle(ra) / 15;
+    local ra_deg = math.atan2(math.sin(longitude * rad) * math.cos(obliquity * rad) - math.tan(latitude * rad) * math.sin(obliquity * rad), math.cos(longitude * rad)) / rad;
     local dec = math.asin(math.sin(latitude * rad) * math.cos(obliquity * rad) + math.cos(latitude * rad) * math.sin(obliquity * rad) * math.sin(longitude * rad)) / rad;
+    local vec = {
+      x = distance * math.cos(dec * rad) * math.cos(ra_deg * rad),
+      y = distance * math.cos(dec * rad) * math.sin(ra_deg * rad),
+      z = distance * math.sin(dec * rad)
+    }
+    ra = Orb.RoundAngle(ra_deg) / 15;  
     return {
       ra = ra,
       dec = dec,
+      x = vec.x,
+      y = vec.y,
+      z = vec.z,
       distance = distance,
       obliquity = obliquity,
-      date = date
-    }
-  end
-
-  Luna.xyz = function (date)
-    local latlng = Luna.latlng(date);
-    local rad = math.pi/180;
-    local latitude = latlng.latitude
-    local longitude = latlng.longitude
-    local distance = latlng.distance
-    local x = distance * math.cos(latitude * rad) * math.cos(longitude * rad);
-    local y = distance * math.cos(latitude * rad) * math.sin(longitude * rad);
-    local z = distance * math.sin(latitude * rad);
-    return {
-      x = x,
-      y = y,
-      z = z,
       date = date
     }
   end

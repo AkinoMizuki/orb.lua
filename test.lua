@@ -1,13 +1,13 @@
 -- Test code for orb.lua
--- update 2021-07-06 01:00 JST
+-- update 2021-07-10 01:00 JST
 
 local Orb = require("orb")
 
 -- time conversion
-local t = {year=2000,month=1,day=1,hour=12,min=0,sec=0}
+-- local t = {year=2000,month=1,day=1,hour=12,min=0,sec=0}
 
 -- now
---local t = os.date("!*t")
+local t = os.date("!*t")
 
 local utc_str = os.date('%Y-%m-%dT%H:%M:%S', os.time(t))
 print("UTC: " .. utc_str)
@@ -27,10 +27,10 @@ print("GST: ".. gst)
 local sirius = {
   ra=6.75257,
   dec = -16.7131,
-  distance = 543300
+  distance = 1.0
 }
 
-local vec = Orb.Coord.RadecToEquatorial(sirius.ra,sirius.dec,1)
+local vec = Orb.Coord.RadecToXYZ(sirius)
 print("Sirius(equatorial)\n x:" .. vec.x .. ", y: " .. vec.y .. ", z: " .. vec.z)
 
 local observer = {
@@ -130,17 +130,14 @@ local pluto_horizontal = Orb.Observe.EclipticToHorizontal(t,pluto_ecliptic,obser
 print("Pluto(horizontal)\n azimuth:" .. pluto_horizontal.azimuth .. ", elevation: " .. pluto_horizontal.elevation .. ", distance: " .. pluto_horizontal.distance)
 
 
-Orb.Moon = require("luna")
-
-local moon_equatorial = Orb.Moon.Equatorial(t)
+local moon_equatorial = Orb.Moon(t)
 print("Moon(equatorial)\n  x:" .. moon_equatorial.x .. ", y: " .. moon_equatorial.y .. ", z: " .. moon_equatorial.z)
 
-local moon_ecliptic = Orb.Moon.Ecliptic(t)
+print("Moon(radec)\n  ra:" .. moon_equatorial.ra .. ", dec: " .. moon_equatorial.dec .. ", distance: " .. moon_equatorial.distance)
+
+
+local moon_ecliptic = Orb.Coord.EquatorialToEcliptic(t,moon_equatorial)
 print("Moon(ecliptic)\n  x:" .. moon_ecliptic.x .. ", y: " .. moon_ecliptic.y .. ", z: " .. moon_ecliptic.z)
 
-local moon_radec = Orb.Moon.RaDec(t)
-print("Moon(radec)\n  ra:" .. moon_radec.ra .. ", dec: " .. moon_radec.dec .. ", distance: " .. moon_radec.distance)
-
-local moon_horizontal = Orb.Moon.Horizontal(t,observer)
+local moon_horizontal = Orb.Observe.RadecToHorizontal(t,moon_equatorial,observer)
 print("Moon(horizontal)\n  azimuth:" .. moon_horizontal.azimuth .. ", elevation: " .. moon_horizontal.elevation .. ", distance: " .. moon_horizontal.distance)
-
