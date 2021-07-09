@@ -214,13 +214,8 @@ Orb.Coord.EclipticToEquatorial = function (date,vec)
   local gcx = ecliptic.x - ep.x;
   local gcy = ecliptic.y - ep.y;
   local gcz = ecliptic.z - ep.z;
-  local ecl
-  if Orb.Storage.obliquity then
-    ecl = Orb.Storage.obliquity
-  else
-    local nao = Orb.Coord.NutationAndObliquity(date)
-    ecl = nao.obliquity
-  end
+  local nao = Orb.Coord.NutationAndObliquity(date)
+  local ecl = nao.obliquity
   local equatorial = {
     x = gcx,
     y = gcy * math.cos(ecl * rad) - gcz * math.sin(ecl * rad),
@@ -236,8 +231,8 @@ end
 
 function Orb.Coord.NutationAndObliquity(date)
   local rad = math.pi/180;
-  local delta_t = (37 + 32.184) / 86400;
-  local jd = Orb.Time.JD(date) + delta_t;
+  local tt = Orb.Time.TT(date)
+  local jd = Orb.Time.JD(tt);
   local t = (jd - 2451545.0) / 36525;
   local omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + (t * t * t / 450000);
   local L0 = 280.4665 + 36000.7698 * t;
