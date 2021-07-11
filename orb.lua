@@ -1,7 +1,7 @@
 -- Orb.lua 
 -- partial port of orb.js into lua lang
 -- MIT License / Isana, Kashiwai 2021
--- update 2021-07-10 01:00 JST
+-- update 2021-07-11 23:00 JST
 
 -- name space
 
