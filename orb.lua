@@ -45,21 +45,21 @@ end
 
 Orb.Time = {}
 
-
+-- Terrestrial Time
 function Orb.Time.TT(date)
   local delta_t = (37 + 32)
-  local tt_in_sec = os.time(date) + delta_t
-  return os.date("*t",tt_in_sec)
+  local jd =Orb.Time.JD(date)
+  local offset_jd = jd + (delta_t/86400)
+  return Orb.Time.JDToUTC(offset_jd)
 end
-
 
 -- Jurian day
 
 function Orb.Time.JD(date)
-  local year = date.year;
-  local month = date.month;;
-  local day = date.day;
-  local time_in_day = date.hour / 24 + date.min / 1440 + date.sec / 86400;
+  local year = tonumber(date.year);
+  local month = tonumber(date.month);;
+  local day = tonumber(date.day);
+  local time_in_day = tonumber(date.hour) / 24 + tonumber(date.min) / 1440 + tonumber(date.sec) / 86400;
   if month <= 2 then
     year = year - 1;
     month = month + 12;
@@ -114,8 +114,12 @@ end
 -- Greenwich Apparent Sidereal Time
 function Orb.Time.gst(date) 
   local rad = math.pi/180;
-  local time_in_sec = date.hour * 3600 + date.min * 60 + date.sec
-  local time_in_day = date.hour / 24 + date.min / 1440 + date.sec / 86400;
+  local hour = tonumber(date.hour)
+  local min = tonumber(date.min)
+  local sec = tonumber(date.sec)
+
+  local time_in_sec = hour * 3600 + min * 60 + sec
+  local time_in_day = hour / 24 + min / 1440 + sec / 86400;
   local jd = Orb.Time.JD(date);
   local jd0 = jd - time_in_day;
 

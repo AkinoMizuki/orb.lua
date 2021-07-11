@@ -4,13 +4,13 @@
 local Orb = require("orb")
 
 -- time conversion
--- local t = {year=2000,month=1,day=1,hour=12,min=0,sec=0}
+local t = {year=1128,month=05,day=18,hour=0,min=0,sec=0}
 
 -- now
-local t = os.date("!*t")
+-- local t = os.date("!*t")
 
-local utc_str = os.date('%Y-%m-%dT%H:%M:%S', os.time(t))
-print("UTC: " .. utc_str)
+-- local utc_str = os.date('%Y-%m-%dT%H:%M:%S', os.time(t))
+-- print("UTC: " .. utc_str)
 
 local jd = Orb.Time.JD(t)
 print("JD: " .. jd)
