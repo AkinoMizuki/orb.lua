@@ -46,11 +46,8 @@ end
 Orb.Time = {}
 
 -- Terrestrial Time
-function Orb.Time.TT(date)
-  local delta_t = (37 + 32)
-  local jd =Orb.Time.JD(date)
-  local offset_jd = jd + (delta_t/86400)
-  return Orb.Time.JDToUTC(offset_jd)
+function Orb.Time.DeltaT()
+  return (37 + 32)
 end
 
 -- Jurian day
@@ -235,8 +232,8 @@ end
 
 function Orb.Coord.NutationAndObliquity(date)
   local rad = math.pi/180;
-  local tt = Orb.Time.TT(date)
-  local jd = Orb.Time.JD(tt);
+  local dt = Orb.Time.DeltaT()
+  local jd = Orb.Time.JD(date) + dt/86400;
   local t = (jd - 2451545.0) / 36525;
   local omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + (t * t * t / 450000);
   local L0 = 280.4665 + 36000.7698 * t;
@@ -428,8 +425,8 @@ Orb.Sun = {}
 
 function Orb.Sun.EclipticLongitude(date)
   local rad = math.pi/180;
-  local tt = Orb.Time.TT(date)
-  local jd = Orb.Time.JD(tt)
+  local dt = Orb.Time.DeltaT()
+  local jd = Orb.Time.JD(date) + dt/86400;
   local t = (jd - 2451545.0) / 36525;
   local mean_longitude = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
   local mean_anomaly = 357.52911 + 35999.05029 * t - 0.0001537 * t * t;

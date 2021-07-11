@@ -1,12 +1,12 @@
--- update 2021-07-10 01:00 JST
+-- update 2021-07-11 23:00 JST
 
 local Luna = {}
 
 Luna.latlng =  function (date)
   local rad = math.pi/180;
   local deg = 180 / math.pi;
-  local tt = Orb.Time.TT(date);
-  local jd = Orb.Time.JD(tt);
+  local dt = Orb.Time.DeltaT()
+  local jd = Orb.Time.JD(date) + dt/86400;
 
   --ephemeris days from the epch J2000.0
   local t = (jd - 2451545.0) / 36525;
