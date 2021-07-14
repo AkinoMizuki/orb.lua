@@ -4,10 +4,10 @@
 local Orb = require("orb")
 
 -- time conversion
-local t = {year=1128,month=05,day=18,hour=0,min=0,sec=0}
+-- local t = {year=2000,month=05,day=18,hour=21,min=0,sec=0}
 
 -- now
--- local t = os.date("!*t")
+local t = os.date("!*t")
 
 -- local utc_str = os.date('%Y-%m-%dT%H:%M:%S', os.time(t))
 -- print("UTC: " .. utc_str)
@@ -27,6 +27,12 @@ print("GST: ".. gst)
 local sirius = {
   ra=6.75257,
   dec = -16.7131,
+  distance = 1.0
+}
+
+local sirius = {
+  ra=0,
+  dec = 90,
   distance = 1.0
 }
 
@@ -58,7 +64,7 @@ local ecm = Orb.Coord.EclipticToEquatorial(t,mars)
 print("Mars(equatorial)\n x:" .. ecm.x .. ", y: " .. ecm.y .. ", z: " .. ecm.z)
 
 local mars_radec = Orb.Coord.EquatorialToRadec(t,ecm)
-print("Mars(radec)\n x:" .. mars_radec.ra .. ", y: " .. mars_radec.dec .. ", distance: " .. mars_radec.distance)
+print("Mars(radec)\n ra:" .. mars_radec.ra .. ", dec: " .. mars_radec.dec .. ", distance: " .. mars_radec.distance)
 
 -- Horizontal Coordinate
 local obs = Orb.Observe.RadecToHorizontal(t,mars_radec,observer)
@@ -141,3 +147,12 @@ print("Moon(ecliptic)\n  x:" .. moon_ecliptic.x .. ", y: " .. moon_ecliptic.y ..
 
 local moon_horizontal = Orb.Observe.RadecToHorizontal(t,moon_equatorial,observer)
 print("Moon(horizontal)\n  azimuth:" .. moon_horizontal.azimuth .. ", elevation: " .. moon_horizontal.elevation .. ", distance: " .. moon_horizontal.distance)
+
+-- Sun
+
+local sun_equatorial = Orb.Sun(t)
+print("Sun(radec)\n  ra:" .. sun_equatorial.ra .. ", dec: " .. sun_equatorial.dec .. ", distance: " .. sun_equatorial.distance)
+print("Sun(equatorial)\n  x:" .. sun_equatorial.x .. ", y: " .. sun_equatorial.y .. ", z: " .. sun_equatorial.y)
+
+local sun_horizontal = Orb.Observe.RadecToHorizontal(t,sun_equatorial,observer)
+print("Sun(horizontal)\n  azimuth:" .. sun_horizontal.azimuth .. ", elevation: " .. sun_horizontal.elevation .. ", distance: " .. sun_horizontal.distance)
