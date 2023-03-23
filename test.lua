@@ -1,5 +1,5 @@
 -- Test code for orb.lua
--- update 2021-07-11 23:00 JST
+-- update 2023-03-23 23:00 JST
 
 local Orb = require("orb")
 
@@ -161,10 +161,11 @@ print("Sun(horizontal)\n  azimuth:" .. sun_horizontal.azimuth .. ", elevation: "
 --satellite
 local name = "ISS (ZARYA)"
 local tle = {
-  first_line = "1 25544U 98067A   23081.36343941  .00015575  00000+0  28639-3 0  9990",
-  second_line = "2 25544  51.6416  38.6887 0006071 118.7594  17.1799 15.49378099388327"
+  first_line = "1 25544U 98067A   23082.39717484  .00016571  00000+0  30373-3 0  9996",
+  second_line = "2 25544  51.6420  33.5716 0006039 122.8805  22.8850 15.49417071388484"
 }
 
 local satellite = Orb.SGP4.satellite(t, name, tle)
 print("ISS (ZARYA)(xyz)\n x:" .. satellite.x .. ", y: " .. satellite.y .. ", z: " .. satellite.z)
 print("ISS (ZARYA)(dot)\n x:" .. satellite.xdot .. ", y: " .. satellite.ydot .. ", z: " .. satellite.zdot)
+print("ISS (ZARYA)(dot)\n longitude:" .. satellite.longitude .. " degree , latitude: " .. satellite.latitude .. " degree , altitude: " .. satellite.altitude .. " km, velocity: " .. satellite.velocity*3600 .. " km/s")

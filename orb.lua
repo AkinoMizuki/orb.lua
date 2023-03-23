@@ -974,8 +974,82 @@ Orb.SGP4.SetSGP4 = function (omm)
 end
 
 
+Orb.SGP4.RectangularToGeographic = function (time, rect)
+
+  local time = time;
+  local xkm = rect.x;
+  local ykm = rect.y;
+  local zkm = rect.z;
+  local xdotkmps = rect.xdot;
+  local ydotkmps = rect.ydot;
+  local zdotkmps = rect.zdot;
+  local rad = math.pi / 180;
+  local gmst = Orb.Time.gst(time)
+  local lst = gmst * 15;
+  local f = 0.00335277945 --Earth's flattening term in WGS-72 (= 1/298.26)
+  local a = 6378.135  --Earth's equational radius in WGS-72 (km)
+  local r = math.sqrt(xkm * xkm + ykm * ykm);
+  local lng = math.atan2(ykm, xkm) / rad - lst;
+
+  if lng > 360 then 
+    lng = lng % 360
+  end
+
+  if lng < 0 then
+    lng = lng % 360 + 360;
+  end
+
+  if lng > 180 then
+    lng = lng - 360
+  end
+
+  local lat = math.atan2(zkm, r);
+  local e2 = f * (2 - f);
+  local tmp_lat = 0
+
+  tmp_lat = lat;
+  local sin_lat = math.sin(tmp_lat)
+  local c = 1 / math.sqrt(1 - e2 * sin_lat * sin_lat);
+  lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r);
+  
+  while math.abs(lat - tmp_lat) > 0.0001 do
+
+    tmp_lat = lat;
+    sin_lat = math.sin(tmp_lat)
+    c = 1 / math.sqrt(1 - e2 * sin_lat * sin_lat);
+    lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r);
+
+  end
+
+  local alt = r / math.cos(lat) - a * c;
+  local v = math.sqrt(xdotkmps * xdotkmps + ydotkmps * ydotkmps + zdotkmps * zdotkmps);
+  return {
+    longitude = lng,
+    latitude = lat / rad,
+    altitude = alt,
+    velocity = v
+  }
+end
+
+
 Orb.SGP4.satellite = function(date, name, tle)
-  return Orb.SGP4.Exec(date, name, tle)
+
+  local rect = Orb.SGP4.Exec(date, name, tle)
+  local geo = Orb.SGP4.RectangularToGeographic(date, rect)
+
+  return {
+    x = rect.x,
+    y = rect.y,
+    z = rect.z,
+    xdot = rect.xdot,
+    ydot = rect.ydot,
+    zdot = rect.zdot,
+    longitude = geo.longitude,
+    latitude = geo.latitude,
+    altitude = geo.altitude,
+    velocity = geo.velocity
+  }
+
 end
 
 
