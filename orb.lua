@@ -71,6 +71,26 @@ function Orb.Explode(explodeCode, str)
 end
 
 
+function Orb.LongitudeLatitude(ISS_Pos)
+  --緯度経度変換
+      local Longitude --経度
+      local Latitude  --緯度
+  
+      --経度
+      local SubLongitude = math.abs(ISS_Pos.x)^2 + math.abs(ISS_Pos.y)^2 + math.abs(ISS_Pos.z)^2
+      Longitude = math.deg(math.asin(ISS_Pos.z / math.sqrt(SubLongitude)))
+  
+      --緯度
+      Latitude = math.deg(math.atan2(ISS_Pos.y,ISS_Pos.x))
+  
+      return{
+  
+          E = Latitude,
+          N = Longitude
+      }
+  
+  end--END_緯度経度変換
+
 Orb.Time = {}
 
 -- Terrestrial Time

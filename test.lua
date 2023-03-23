@@ -127,7 +127,7 @@ local pluto_elements = {
   semi_major_axis = 39.8362800
 }
 local pluto_ecliptic = Orb.Kepler(t,pluto_elements);
-print("Pluto(ecliptic)\n x:" .. pluto_ecliptic.x .. "au, y:" .. pluto_ecliptic.y .. "au, z:" .. pluto_ecliptic.z .. "km")
+print("Pluto(ecliptic)\n x:" .. pluto_ecliptic.x .. "au, y:" .. pluto_ecliptic.y .. "au, z:" .. pluto_ecliptic.z .. "au")
 
 local pluto_equatorial = Orb.Coord.EclipticToEquatorial(t,pluto_ecliptic)
 print("Pluto(equatorial)\n x:" .. pluto_equatorial.x .. ", y: " .. pluto_equatorial.y .. ", z: " .. pluto_equatorial.z)
@@ -168,4 +168,28 @@ local tle = {
 local satellite = Orb.SGP4.satellite(t, name, tle)
 print("ISS (ZARYA)(xyz)\n x:" .. satellite.x .. ", y: " .. satellite.y .. ", z: " .. satellite.z)
 print("ISS (ZARYA)(dot)\n x:" .. satellite.xdot .. ", y: " .. satellite.ydot .. ", z: " .. satellite.zdot)
-print("ISS (ZARYA)(dot)\n longitude:" .. satellite.longitude .. " degree , latitude: " .. satellite.latitude .. " degree , altitude: " .. satellite.altitude .. " km, velocity: " .. satellite.velocity*3600 .. " km/s")
+print("ISS (ZARYA)(dot)\n longitude:" .. satellite.longitude .. " degree , latitude: " .. satellite.latitude .. " degree , altitude: " .. satellite.altitude .. " km, velocity: " .. satellite.velocity*3600 .. " km/h")
+
+--longitude ISS緯度変換
+local longitude = math.abs(satellite.longitude);
+local h_longitude = math.floor(longitude);
+local m_longitude = math.floor((longitude  - h_longitude) * 60);
+local s_longitude = ((longitude  - h_longitude) * 60 * 60) - (m_longitude * 60);
+
+--latitude ISS緯度変換
+local latitude = math.abs(satellite.latitude);
+local h_latitude = math.floor(latitude);
+local m_latitude = math.floor((latitude - h_latitude) * 60);
+local s_latitude = ((latitude - h_latitude) * 60 * 60) - (m_latitude * 60);
+
+local longitude_EW = "N"
+local latitude_NS = "E"
+
+if satellite.latitude <= 0 then
+  latitude_NS = "S"
+end
+
+if satellite.latitude <= 0 then
+  longitude_EW = "W"
+end
+print(latitude_NS .. ":" .. Orb.ZeroFill(h_latitude, 3) .. "˚" .. Orb.ZeroFill(m_latitude, 2) .. "'" .. Orb.ZeroFill(s_latitude, 2) .. " " ..longitude_EW .. ":" .. Orb.ZeroFill(h_longitude, 3) .. "˚" .. Orb.ZeroFill(m_longitude, 2) .. "'" .. Orb.ZeroFill(s_longitude, 2) .. " altitude: " .. math.floor(satellite.altitude * 1000) / 1000 .. " km velocity: " .. math.floor(satellite.velocity * 1000) / 1000 .. " km/s")
