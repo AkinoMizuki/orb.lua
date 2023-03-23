@@ -156,3 +156,15 @@ print("Sun(equatorial)\n  x:" .. sun_equatorial.x .. ", y: " .. sun_equatorial.y
 
 local sun_horizontal = Orb.Observe.RadecToHorizontal(t,sun_equatorial,observer)
 print("Sun(horizontal)\n  azimuth:" .. sun_horizontal.azimuth .. ", elevation: " .. sun_horizontal.elevation .. ", distance: " .. sun_horizontal.distance)
+
+
+--satellite
+local name = "ISS (ZARYA)"
+local tle = {
+  first_line = "1 25544U 98067A   23081.36343941  .00015575  00000+0  28639-3 0  9990",
+  second_line = "2 25544  51.6416  38.6887 0006071 118.7594  17.1799 15.49378099388327"
+}
+
+local satellite = Orb.SGP4.satellite(t, name, tle)
+print("ISS (ZARYA)(xyz)\n x:" .. satellite.x .. ", y: " .. satellite.y .. ", z: " .. satellite.z)
+print("ISS (ZARYA)(dot)\n x:" .. satellite.xdot .. ", y: " .. satellite.ydot .. ", z: " .. satellite.zdot)
