@@ -1082,7 +1082,7 @@ Orb.SGP4.satellite = function(date, name, tle)
   local long = Orb.SGP4.LongitudeLatitude(geo.longitude)
   local lat = Orb.SGP4.LongitudeLatitude(geo.latitude)
 
-  local longitude_EW = "E"
+  local longitude_EW = "W"
   local latitude_NS = "N"
   
   if geo.longitude <= 0 then
@@ -1090,7 +1090,7 @@ Orb.SGP4.satellite = function(date, name, tle)
   end
   
   if geo.latitude <= 0 then
-    longitude_EW = "W"
+    longitude_EW = "E"
   end
 
   local NS = Orb.ZeroFill(lat.h, 3) .. "˚" .. Orb.ZeroFill(lat.m, 2) .. "'" .. Orb.ZeroFill(lat.s, 2)
