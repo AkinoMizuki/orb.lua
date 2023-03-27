@@ -1,10 +1,10 @@
 -- Test code for orb.lua
--- update 2023-03-23 23:00 JST
+-- update 2023-03-27 22:00 JST
 
 local Orb = require("orb")
 
--- time conversion
--- local t = {year=2000,month=05,day=18,hour=21,min=0,sec=0}
+--time conversion
+--local t = {year=2020,month=06,day=24,hour=23,min=30,sec=28}
 
 -- now
 local t = os.date("!*t")
@@ -161,8 +161,8 @@ print("Sun(horizontal)\n  azimuth:" .. sun_horizontal.azimuth .. ", elevation: "
 --satellite
 local name = "ISS (ZARYA)"
 local tle = {
-  first_line = "1 25544U 98067A   23082.39717484  .00016571  00000+0  30373-3 0  9996",
-  second_line = "2 25544  51.6420  33.5716 0006039 122.8805  22.8850 15.49417071388484"
+  first_line = "1 25544U 98067A   23086.20188432  .00024982  00000+0  45015-3 0  9999",
+  second_line = "2 25544  51.6429  14.7356 0005804 135.3885   8.0988 15.49616489389078"
 }
 
 local satellite = Orb.SGP4.satellite(t, name, tle)
@@ -170,26 +170,7 @@ print("ISS (ZARYA)(xyz)\n x:" .. satellite.x .. ", y: " .. satellite.y .. ", z: 
 print("ISS (ZARYA)(dot)\n x:" .. satellite.xdot .. ", y: " .. satellite.ydot .. ", z: " .. satellite.zdot)
 print("ISS (ZARYA)(dot)\n longitude:" .. satellite.longitude .. " degree , latitude: " .. satellite.latitude .. " degree , altitude: " .. satellite.altitude .. " km, velocity: " .. satellite.velocity*3600 .. " km/h")
 
---longitude ISS緯度変換
-local longitude = math.abs(satellite.longitude);
-local h_longitude = math.floor(longitude);
-local m_longitude = math.floor((longitude  - h_longitude) * 60);
-local s_longitude = ((longitude  - h_longitude) * 60 * 60) - (m_longitude * 60);
-
---latitude ISS緯度変換
-local latitude = math.abs(satellite.latitude);
-local h_latitude = math.floor(latitude);
-local m_latitude = math.floor((latitude - h_latitude) * 60);
-local s_latitude = ((latitude - h_latitude) * 60 * 60) - (m_latitude * 60);
-
-local longitude_EW = "N"
-local latitude_NS = "E"
-
-if satellite.latitude <= 0 then
-  latitude_NS = "S"
-end
-
-if satellite.latitude <= 0 then
-  longitude_EW = "W"
-end
-print(latitude_NS .. ":" .. Orb.ZeroFill(h_latitude, 3) .. "˚" .. Orb.ZeroFill(m_latitude, 2) .. "'" .. Orb.ZeroFill(s_latitude, 2) .. " " ..longitude_EW .. ":" .. Orb.ZeroFill(h_longitude, 3) .. "˚" .. Orb.ZeroFill(m_longitude, 2) .. "'" .. Orb.ZeroFill(s_longitude, 2) .. " altitude: " .. math.floor(satellite.altitude * 1000) / 1000 .. " km velocity: " .. math.floor(satellite.velocity * 1000) / 1000 .. " km/s")
+print(satellite.NS .. " : " .. satellite.lat .. " / " ..
+            satellite.EW .. " : " .. satellite.lng .. " / " ..
+          "altitude : " .. math.floor(satellite.altitude * 1000) / 1000 .. " km / velocity : " .. math.floor(satellite.velocity * 1000) / 1000 .. " km/s")
+          

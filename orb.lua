@@ -1,7 +1,7 @@
 -- Orb.lua 
 -- partial port of orb.js into lua lang
 -- MIT License / Isana, Kashiwai 2021
--- update 2023-03-23 23:00 JST
+-- update 2023-03-27 22:00 JST
 
 -- name space
 
@@ -70,26 +70,6 @@ function Orb.Explode(explodeCode, str)
   return result
 end
 
-
-function Orb.LongitudeLatitude(ISS_Pos)
-  --緯度経度変換
-      local Longitude --経度
-      local Latitude  --緯度
-  
-      --経度
-      local SubLongitude = math.abs(ISS_Pos.x)^2 + math.abs(ISS_Pos.y)^2 + math.abs(ISS_Pos.z)^2
-      Longitude = math.deg(math.asin(ISS_Pos.z / math.sqrt(SubLongitude)))
-  
-      --緯度
-      Latitude = math.deg(math.atan2(ISS_Pos.y,ISS_Pos.x))
-  
-      return{
-  
-          E = Latitude,
-          N = Longitude
-      }
-  
-  end--END_緯度経度変換
 
 Orb.Time = {}
 
@@ -587,85 +567,87 @@ Orb.SGP4.Exec = function (time, name, tle)
   local epoch_sec = {year = tonumber(epoch_date[1]), month = tonumber(epoch_date[2]) - 1, day = tonumber(epoch_date[3]), hour = tonumber(epoch_time[1]), min = tonumber(epoch_time[2]), sec = tonumber(epoch_time[3])}
   local tsince = (os.time(now_sec) - os.time(epoch_sec)) / 60
 
-  local xmo = sgp4.xmo;
-  local xmdot = sgp4.xmdot;
-  local omegao = sgp4.omegao;
-  local omgdot = sgp4.omgdot;
-  local xnodeo = sgp4.xnodeo;
-  local xnodot = sgp4.xnodot;
+  local xmo = sgp4.xmo
+  local xmdot = sgp4.xmdot
+  local omegao = sgp4.omegao
+  local omgdot = sgp4.omgdot
+  local xnodeo = sgp4.xnodeo
+  local xnodot = sgp4.xnodot
   local xnodcf = sgp4.xnodcf
-  local bstar = sgp4.bstar;
-  local t2cof = sgp4.t2cof;
-  local omgcof = sgp4.omgcof;
-  local isimp = sgp4.isimp;
-  local xmcof = sgp4.xmcof;
-  local eta = sgp4.eta;
-  local delmo = sgp4.delmo;
-  local c1 = sgp4.c1;
-  local c4 = sgp4.c4;
-  local c5 = sgp4.c5;
-  local d2 = sgp4.d2;
-  local d3 = sgp4.d3;
-  local d4 = sgp4.d4;
-  local sinmo = sgp4.sinmo;
-  local t3cof = sgp4.t3cof;
-  local t4cof = sgp4.t4cof;
-  local t5cof = sgp4.t5cof;
-  local aodp = sgp4.aodp;
-  local eo = sgp4.eo;
-  local xnodp = sgp4.xnodp;
-  local xke = sgp4.xke;
-  local xlcof = sgp4.xlcof;
-  local aycof = sgp4.aycof;
-  local x3thm1 = sgp4.x3thm1;
-  local x1mth2 = sgp4.x1mth2;
-  local xincl = sgp4.xincl;
-  local cosio = sgp4.cosio;
-  local sinio = sgp4.sinio;
-  local e6a = sgp4.e6a;
-  local ck2 = sgp4.ck2;
-  local x7thm1 = sgp4.x7thm1;
-  local xkmper = sgp4.xkmper;
-  local epoch_year = sgp4.epoch_year;
-  local epoch = sgp4.epoch;
-  local xmdf = xmo + xmdot * tsince;
-  local omgadf = omegao + omgdot * tsince;
-  local xnoddf = xnodeo + xnodot * tsince;
-  local omega = omgadf;
-  local xmp = xmdf;
-  local tsq = tsince * tsince;
-  local xnode = xnoddf + xnodcf * tsq;
-  local tempa = 1.0 - c1 * tsince;
-  local tempe = bstar * c4 * tsince;
-  local templ = t2cof * tsq;
+  local bstar = sgp4.bstar
+  local t2cof = sgp4.t2cof
+  local omgcof = sgp4.omgcof
+  local isimp = sgp4.isimp
+  local xmcof = sgp4.xmcof
+  local eta = sgp4.eta
+  local delmo = sgp4.delmo
+  local c1 = sgp4.c1
+  local c4 = sgp4.c4
+  local c5 = sgp4.c5
+  local d2 = sgp4.d2
+  local d3 = sgp4.d3
+  local d4 = sgp4.d4
+  local sinmo = sgp4.sinmo
+  local t3cof = sgp4.t3cof
+  local t4cof = sgp4.t4cof
+  local t5cof = sgp4.t5cof
+  local aodp = sgp4.aodp
+  local eo = sgp4.eo
+  local xnodp = sgp4.xnodp
+  local xke = sgp4.xke
+  local xlcof = sgp4.xlcof
+  local aycof = sgp4.aycof
+  local x3thm1 = sgp4.x3thm1
+  local x1mth2 = sgp4.x1mth2
+  local xincl = sgp4.xincl
+  local cosio = sgp4.cosio
+  local sinio = sgp4.sinio
+  local e6a = sgp4.e6a
+  local ck2 = sgp4.ck2
+  local x7thm1 = sgp4.x7thm1
+  local xkmper = sgp4.xkmper
+  local epoch_year = sgp4.epoch_year
+  local epoch = sgp4.epoch
+  local xmdf = xmo + xmdot * tsince
+  local omgadf = omegao + omgdot * tsince
+  local xnoddf = xnodeo + xnodot * tsince
+  local omega = omgadf
+  local xmp = xmdf
+  local tsq = tsince * tsince
+  local xnode = xnoddf + xnodcf * tsq
+  local tempa = 1.0 - c1 * tsince
+  local tempe = bstar * c4 * tsince
+  local templ = t2cof * tsq
+
   if not(isimp == 1) then
-    local delomg = omgcof * tsince;
-    local delm = xmcof * (math.pow((1.0 + eta * math.cos(xmdf)), 3) - delmo);
-    local temp = delomg + delm;
-    local xmp = xmdf + temp;
-    omega = omgadf - temp;
-    local tcube = tsq * tsince;
-    local tfour = tsince * tcube;
-    tempa = tempa - d2 * tsq - d3 * tcube - d4 * tfour;
-    tempe = tempe + bstar * c5 * (math.sin(xmp) - sinmo);
-    templ = templ + t3cof * tcube + tfour * (t4cof + tsince * t5cof);
+    local delomg = omgcof * tsince
+    local delm = xmcof * (math.pow((1.0 + eta * math.cos(xmdf)), 3) - delmo)
+    local temp = delomg + delm
+    local xmp = xmdf + temp
+    omega = omgadf - temp
+    local tcube = tsq * tsince
+    local tfour = tsince * tcube
+    tempa = tempa - d2 * tsq - d3 * tcube - d4 * tfour
+    tempe = tempe + bstar * c5 * (math.sin(xmp) - sinmo)
+    templ = templ + t3cof * tcube + tfour * (t4cof + tsince * t5cof)
   end
-  local a = aodp * tempa * tempa;
-  local e = eo - tempe;
-  local xl = xmp + omega + xnode + xnodp * templ;
-  local beta = math.sqrt(1.0 - e * e);
-  local xn = xke / math.pow(a, 1.5);
+
+  local a = aodp * tempa * tempa
+  local e = eo - tempe
+  local xl = xmp + omega + xnode + xnodp * templ
+  local beta = math.sqrt(1.0 - e * e)
+  local xn = xke / math.pow(a, 1.5)
 
   -- long period periodics
-  local axn = e * math.cos(omega);
-  local temp = 1.0 / (a * beta * beta);
-  local xll = temp * xlcof * axn;
-  local aynl = temp * aycof;
-  local xlt = xl + xll;
-  local ayn = e * math.sin(omega) + aynl;
+  local axn = e * math.cos(omega)
+  local temp = 1.0 / (a * beta * beta)
+  local xll = temp * xlcof * axn
+  local aynl = temp * aycof
+  local xlt = xl + xll
+  local ayn = e * math.sin(omega) + aynl
 
   -- solve keplers equation
-  local capu = (xlt - xnode) % (2.0 * math.pi);
+  local capu = (xlt - xnode) % (2.0 * math.pi)
   local temp2 = capu;
   local sinepw
   local cosepw
@@ -676,78 +658,82 @@ Orb.SGP4.Exec = function (time, name, tle)
   local epw
 
   for i = 1, 10 do
-    sinepw = math.sin(temp2);
-    cosepw = math.cos(temp2);
-    temp3 = axn * sinepw;
-    temp4 = ayn * cosepw;
-    temp5 = axn * cosepw;
-    temp6 = ayn * sinepw;
-    epw = (capu - temp4 + temp3 - temp2) / (1.0 - temp5 - temp6) + temp2;
+    sinepw = math.sin(temp2)
+    cosepw = math.cos(temp2)
+    temp3 = axn * sinepw
+    temp4 = ayn * cosepw
+    temp5 = axn * cosepw
+    temp6 = ayn * sinepw
+    epw = (capu - temp4 + temp3 - temp2) / (1.0 - temp5 - temp6) + temp2
+
     if math.abs(epw - temp2) <= e6a then
       break
     end
-    temp2 = epw;
+
+    temp2 = epw
+    
   end
+
   -- short period preliminary quantities
-  local ecose = temp5 + temp6;
-  local esine = temp3 - temp4;
-  local elsq = axn * axn + ayn * ayn;
-  local temp = 1.0 - elsq;
-  local pl = a * temp;
-  local r = a * (1.0 - ecose);
-  local temp1 = 1.0 / r;
-  local rdot = xke * math.sqrt(a) * esine * temp1;
-  local rfdot = xke * math.sqrt(pl) * temp1;
-  local temp2 = a * temp1;
-  local betal = math.sqrt(temp);
-  local temp3 = 1.0 / (1.0 + betal);
-  local cosu = temp2 * (cosepw - axn + ayn * esine * temp3);
-  local sinu = temp2 * (sinepw - ayn - axn * esine * temp3);
-  local u = math.atan2(sinu, cosu);
+  local ecose = temp5 + temp6
+  local esine = temp3 - temp4
+  local elsq = axn * axn + ayn * ayn
+  local temp = 1.0 - elsq
+  local pl = a * temp
+  local r = a * (1.0 - ecose)
+  local temp1 = 1.0 / r
+  local rdot = xke * math.sqrt(a) * esine * temp1
+  local rfdot = xke * math.sqrt(pl) * temp1
+  local temp2 = a * temp1
+  local betal = math.sqrt(temp)
+  local temp3 = 1.0 / (1.0 + betal)
+  local cosu = temp2 * (cosepw - axn + ayn * esine * temp3)
+  local sinu = temp2 * (sinepw - ayn - axn * esine * temp3)
+  local u = math.atan2(sinu, cosu)
 
   if u < 0 then
     u = u + 2 * math.pi
   end
 
-  local sin2u = 2.0 * sinu * cosu;
-  local cos2u = 2.0 * cosu * cosu - 1.;
-  local temp = 1.0 / pl;
-  local temp1 = ck2 * temp;
-  local temp2 = temp1 * temp;
+  local sin2u = 2.0 * sinu * cosu
+  local cos2u = 2.0 * cosu * cosu - 1.
+  local temp = 1.0 / pl
+  local temp1 = ck2 * temp
+  local temp2 = temp1 * temp
   -- update for short periodics
-  local rk = r * (1.0 - 1.5 * temp2 * betal * x3thm1) + 0.5 * temp1 * x1mth2 * cos2u;
-  local uk = u - 0.25 * temp2 * x7thm1 * sin2u;
-  local xnodek = xnode + 1.5 * temp2 * cosio * sin2u;
-  local xinck = xincl + 1.5 * temp2 * cosio * sinio * cos2u;
-  local rdotk = rdot - xn * temp1 * x1mth2 * sin2u;
-  local rfdotk = rfdot + xn * temp1 * (x1mth2 * cos2u + 1.5 * x3thm1);
+  local rk = r * (1.0 - 1.5 * temp2 * betal * x3thm1) + 0.5 * temp1 * x1mth2 * cos2u
+  local uk = u - 0.25 * temp2 * x7thm1 * sin2u
+  local xnodek = xnode + 1.5 * temp2 * cosio * sin2u
+  local xinck = xincl + 1.5 * temp2 * cosio * sinio * cos2u
+  local rdotk = rdot - xn * temp1 * x1mth2 * sin2u
+  local rfdotk = rfdot + xn * temp1 * (x1mth2 * cos2u + 1.5 * x3thm1)
   -- orientation vectors
-  local sinuk = math.sin(uk);
-  local cosuk = math.cos(uk);
-  local sinik = math.sin(xinck);
-  local cosik = math.cos(xinck);
-  local sinnok = math.sin(xnodek);
-  local cosnok = math.cos(xnodek);
-  local xmx = -sinnok * cosik;
-  local xmy = cosnok * cosik;
-  local ux = xmx * sinuk + cosnok * cosuk;
-  local uy = xmy * sinuk + sinnok * cosuk;
-  local uz = sinik * sinuk;
-  local vx = xmx * cosuk - cosnok * sinuk;
-  local vy = xmy * cosuk - sinnok * sinuk;
-  local vz = sinik * cosuk;
-  local x = rk * ux;
-  local y = rk * uy;
-  local z = rk * uz;
-  local xdot = rdotk * ux + rfdotk * vx;
-  local ydot = rdotk * uy + rfdotk * vy;
-  local zdot = rdotk * uz + rfdotk * vz;
-  local xkm = (x * xkmper);
-  local ykm = (y * xkmper);
-  local zkm = (z * xkmper);
-  local xdotkmps = (xdot * xkmper / 60);
-  local ydotkmps = (ydot * xkmper / 60);
-  local zdotkmps = (zdot * xkmper / 60);
+  local sinuk = math.sin(uk)
+  local cosuk = math.cos(uk)
+  local sinik = math.sin(xinck)
+  local cosik = math.cos(xinck)
+  local sinnok = math.sin(xnodek)
+  local cosnok = math.cos(xnodek)
+  local xmx = -sinnok * cosik
+  local xmy = cosnok * cosik
+  local ux = xmx * sinuk + cosnok * cosuk
+  local uy = xmy * sinuk + sinnok * cosuk
+  local uz = sinik * sinuk
+  local vx = xmx * cosuk - cosnok * sinuk
+  local vy = xmy * cosuk - sinnok * sinuk
+  local vz = sinik * cosuk
+  local x = rk * ux
+  local y = rk * uy
+  local z = rk * uz
+  local xdot = rdotk * ux + rfdotk * vx
+  local ydot = rdotk * uy + rfdotk * vy
+  local zdot = rdotk * uz + rfdotk * vz
+  local xkm = (x * xkmper)
+  local ykm = (y * xkmper)
+  local zkm = (z * xkmper)
+  local xdotkmps = (xdot * xkmper / 60)
+  local ydotkmps = (ydot * xkmper / 60)
+  local zdotkmps = (zdot * xkmper / 60)
   return {
     x = xkm,
     y = ykm,
@@ -763,7 +749,7 @@ Orb.SGP4.TLE2OMM = function (date,name, first_line, second_line)
 
   local line1 = first_line;
   local line2 = second_line;
-  local creation_date = date.year .. "-" .. Orb.ZeroFill(date.month + 1, 2) .. "-" .. Orb.ZeroFill(date.day, 2) .. " " .. Orb.ZeroFill(date.hour, 2) .. ":" .. Orb.ZeroFill(date.min, 2) .. ":" .. Orb.ZeroFill(date.sec, 2)
+  local creation_date = date.year .. "-" .. Orb.ZeroFill(date.month , 2) .. "-" .. Orb.ZeroFill(date.day, 2) .. " " .. Orb.ZeroFill(date.hour, 2) .. ":" .. Orb.ZeroFill(date.min, 2) .. ":" .. Orb.ZeroFill(date.sec, 2)
   local id = line1:sub(10, 18)
   local epystr = ""
 
@@ -784,11 +770,14 @@ Orb.SGP4.TLE2OMM = function (date,name, first_line, second_line)
   end
 
   local doy = tonumber(line1:sub(21, 32))
-  local year2 = epoch_year - 1;
-  local epoch_data = {year = year2, month = 11, day = 31, hour = 0, min = 0, sec = 0};
-  local epoch_jd = Orb.Time.JD(epoch_data) + doy/86400;
+  local year2 = epoch_year
+  local epoch_data = {year = year2, month = 1, day = 1, hour = 0, min = 0, sec = 0}
+
+  local epoch_jd = Orb.Time.JD(epoch_data) + (doy)
   local epoch = Orb.Time.JDToUTC(epoch_jd)
-  local epoch_str = epoch.year .. "-" .. Orb.ZeroFill(epoch.month + 1, 2) .. "-" .. Orb.ZeroFill(epoch.day, 2) .. "T" .. Orb.ZeroFill(epoch.hour, 2) .. ":" .. Orb.ZeroFill(epoch.min, 2) .. ":" .. Orb.ZeroFill(epoch.sec, 2);
+  local epoch_str = epoch.year .. "-" .. Orb.ZeroFill(epoch.month, 2) .. "-" .. Orb.ZeroFill(epoch.day-1, 2) .. 
+  "T" .. Orb.ZeroFill(epoch.hour, 2) .. ":" .. Orb.ZeroFill(epoch.min, 2) .. ":" .. Orb.ZeroFill(epoch.sec, 2)
+
   local bstar_mantissa = tonumber(line1:sub(54, 59)) * 1e-5;
   local bstar_exponent = tonumber("1e" .. tonumber(line1:sub(60, 61)));
   local bstar = bstar_mantissa * bstar_exponent
@@ -819,10 +808,10 @@ Orb.SGP4.TLE2OMM = function (date,name, first_line, second_line)
     ARG_OF_PERICENTER = tonumber(line2:sub(35, 42)),
     MEAN_ANOMALY = tonumber(line2:sub(44, 51)),
     EPHEMERIS_TYPE = tonumber(line1:sub(63, 63)),
-    CLASSIFICATION_TYPE = tonumber(line1:sub(8, 7)),
-    NORAD_CAT_ID = tonumber(line1:sub(3, 6)),
-    ELEMENT_SET_NO = tonumber(line1:sub(65, 68)),
-    REV_AT_EPOCH = tonumber(line2:sub(65, 68)),
+    CLASSIFICATION_TYPE = line1:sub(8, 8),
+    NORAD_CAT_ID = tonumber(line1:sub(3, 7)),
+    ELEMENT_SET_NO = tonumber(line1:sub(64, 68)),
+    REV_AT_EPOCH = tonumber(line2:sub(64, 68)),
     BSTAR = bstar,
     MEAN_MOTION_DOT = tonumber(line1:sub(35, 43)),
     MEAN_MOTION_DDOT = mean_motion_ddot,
@@ -838,94 +827,98 @@ end
 
 Orb.SGP4.SetSGP4 = function (omm)
 
-  local torad = math.pi / 180;
-  local ck2 = 5.413080e-4;
-  local ck4 = 0.62098875e-6;
-  local e6a = 1.0e-6;
-  local qoms2t = 1.88027916e-9;
-  local s = 1.01222928; -- 1.0+78.0/xkmper
-  local tothrd = 0.66666667;
-  local xj3 = -0.253881e-5;
-  local xke = 0.743669161e-1;
-  local xkmper = 6378.135;
-  local xmnpda = 1440.0; -- min_par_day
-  local ae = 1.0;
-  local pi = 3.14159265;
-  local pio2 = 1.57079633;
-  local twopi = 6.2831853;
-  local x3pio2 = 4.71238898;
-  local bstar = omm.BSTAR;
-  local xincl = omm.INCLINATION * torad;
-  local xnodeo = omm.RA_OF_ASC_NODE * torad;
-  local eo = omm.ECCENTRICITY;
-  local omegao = omm.ARG_OF_PERICENTER * torad;
-  local xmo = omm.MEAN_ANOMALY * torad;
-  local xno = omm.MEAN_MOTION * 2.0 * math.pi / 1440.0;
-  local a1 = math.pow(xke / xno, tothrd);
-  local cosio = math.cos(xincl);
-  local theta2 = cosio * cosio;
-  local x3thm1 = 3 * theta2 - 1.0;
-  local eosq = eo * eo;
-  local betao2 = 1 - eosq;
-  local betao = math.sqrt(betao2);
-  local del1 = 1.5 * ck2 * x3thm1 / (a1 * a1 * betao * betao2);
-  local ao = a1 * (1 - del1 * ((1.0 / 3.0) + del1 * (1.0 + (134.0 / 81.0) * del1)));
-  local delo = 1.5 * ck2 * x3thm1 / (ao * ao * betao * betao2);
-  local xnodp = xno / (1.0 + delo); --original_mean_motion
-  local aodp = ao / (1.0 - delo); --semi_major_axis
-  local orbital_period = 1440.0 / omm.MEAN_MOTION;
-  local isimp = 0;
+  local torad = math.pi / 180
+  local ck2 = 5.413080e-4
+  local ck4 = 0.62098875e-6
+  local e6a = 1.0e-6
+  local qoms2t = 1.88027916e-9
+  local s = 1.01222928 -- 1.0+78.0/xkmper
+  local tothrd = 0.66666667
+  local xj3 = -0.253881e-5
+  local xke = 0.743669161e-1
+  local xkmper = 6378.135
+  local xmnpda = 1440.0 -- min_par_day
+  local ae = 1.0
+  local pi = 3.14159265
+  local pio2 = 1.57079633
+  local twopi = 6.2831853
+  local x3pio2 = 4.71238898
+  local bstar = omm.BSTAR
+  local xincl = omm.INCLINATION * torad
+  local xnodeo = omm.RA_OF_ASC_NODE * torad
+  local eo = omm.ECCENTRICITY
+  local omegao = omm.ARG_OF_PERICENTER * torad
+  local xmo = omm.MEAN_ANOMALY * torad
+  local xno = omm.MEAN_MOTION * 2.0 * math.pi / 1440.0
+  local a1 = math.pow(xke / xno, tothrd)
+  local cosio = math.cos(xincl)
+  local theta2 = cosio * cosio
+  local x3thm1 = 3 * theta2 - 1.0
+  local eosq = eo * eo
+  local betao2 = 1 - eosq
+  local betao = math.sqrt(betao2)
+  local del1 = 1.5 * ck2 * x3thm1 / (a1 * a1 * betao * betao2)
+  local ao = a1 * (1 - del1 * ((1.0 / 3.0) + del1 * (1.0 + (134.0 / 81.0) * del1)))
+  local delo = 1.5 * ck2 * x3thm1 / (ao * ao * betao * betao2)
+  local xnodp = xno / (1.0 + delo) --original_mean_motion
+  local aodp = ao / (1.0 - delo) --semi_major_axis
+  local orbital_period = 1440.0 / omm.MEAN_MOTION
+  local isimp = 0
+
   if ((aodp * (1.0 - eo) / ae) < (220.0 / xkmper + ae)) then
     isimp = 1;
   end
-  local s4 = s;
-  local qoms24 = qoms2t;
-  local perigee = (aodp * (1.0 - eo) - ae) * xkmper;
-  local apogee = (aodp * (1.0 + eo) - ae) * xkmper;
+  
+  local s4 = s
+  local qoms24 = qoms2t
+  local perigee = (aodp * (1.0 - eo) - ae) * xkmper
+  local apogee = (aodp * (1.0 + eo) - ae) * xkmper
+
   if perigee < 156.0 then
-    s4 = perigee - 78.0;
+    s4 = perigee - 78.0
     if perigee <= 98.0 then
-      s4 = 20.0;
+      s4 = 20.0
     else
-      qoms24 = math.pow(((120.0 - s4) * ae / xkmper), 4);
+      qoms24 = math.pow(((120.0 - s4) * ae / xkmper), 4)
       s4 = s4 / xkmper + ae;
     end
   end
   
-  local pinvsq = 1.0 / (aodp * aodp * betao2 * betao2);
-  local tsi = 1.0 / (aodp - s4);
-  local eta = aodp * eo * tsi;
-  local etasq = eta * eta;
-  local eeta = eo * eta;
-  local psisq = math.abs(1.0 - etasq);
-  local coef = qoms24 * math.pow(tsi, 4);
-  local coef1 = coef / math.pow(psisq, 3.5);
-  local c2 = coef1 * xnodp * (aodp * (1.0 + 1.5 * etasq + eeta * (4.0 + etasq)) + 0.75 * ck2 * tsi / psisq * x3thm1 * (8.0 + 3.0 * etasq * (8.0 + etasq)));
-  local c1 = bstar * c2;
-  local sinio = math.sin(xincl);
-  local a3ovk2 = -xj3 / ck2 * math.pow(ae, 3);
-  local c3 = coef * tsi * a3ovk2 * xnodp * ae * sinio / eo;
-  local x1mth2 = 1.0 - theta2;
-  local c4 = 2.0 * xnodp * coef1 * aodp * betao2 * (eta * (2.0 + 0.5 * etasq) + eo * (0.5 + 2.0 * etasq) - 2.0 * ck2 * tsi / (aodp * psisq) * (-3.0 * x3thm1 * (1.0 - 2.0 * eeta + etasq * (1.5 - 0.5 * eeta)) + 0.75 * x1mth2 * (2.0 * etasq - eeta * (1.0 + etasq)) * math.cos((2.0 * omegao))));
-  local c5 = 2.0 * coef1 * aodp * betao2 * (1.0 + 2.75 * (etasq + eeta) + eeta * etasq);
-  local theta4 = theta2 * theta2;
-  local temp1 = 3.0 * ck2 * pinvsq * xnodp;
-  local temp2 = temp1 * ck2 * pinvsq;
-  local temp3 = 1.25 * ck4 * pinvsq * pinvsq * xnodp;
-  local xmdot = xnodp + 0.5 * temp1 * betao * x3thm1 + 0.0625 * temp2 * betao * (13.0 - 78.0 * theta2 + 137.0 * theta4);
-  local x1m5th = 1.0 - 5.0 * theta2;
-  local omgdot = -0.5 * temp1 * x1m5th + 0.0625 * temp2 * (7.0 - 114.0 * theta2 + 395.0 * theta4) + temp3 * (3.0 - 36.0 * theta2 + 49.0 * theta4);
-  local xhdot1 = -temp1 * cosio;
-  local xnodot = xhdot1 + (0.5 * temp2 * (4.0 - 19.0 * theta2) + 2.0 * temp3 * (3.0 - 7.0 * theta2)) * cosio;
-  local omgcof = bstar * c3 * math.cos(omegao);
-  local xmcof = -tothrd * coef * bstar * ae / eeta;
-  local xnodcf = 3.5 * betao2 * xhdot1 * c1;
-  local t2cof = 1.5 * c1;
-  local xlcof = 0.125 * a3ovk2 * sinio * (3.0 + 5.0 * cosio) / (1.0 + cosio);
+  local pinvsq = 1.0 / (aodp * aodp * betao2 * betao2)
+  local tsi = 1.0 / (aodp - s4)
+  local eta = aodp * eo * tsi
+  local etasq = eta * eta
+  local eeta = eo * eta
+  local psisq = math.abs(1.0 - etasq)
+  local coef = qoms24 * math.pow(tsi, 4)
+  local coef1 = coef / math.pow(psisq, 3.5)
+  local c2 = coef1 * xnodp * (aodp * (1.0 + 1.5 * etasq + eeta * (4.0 + etasq)) + 0.75 * ck2 * tsi / psisq * x3thm1 * (8.0 + 3.0 * etasq * (8.0 + etasq)))
+  local c1 = bstar * c2
+  local sinio = math.sin(xincl)
+  local a3ovk2 = -xj3 / ck2 * math.pow(ae, 3)
+  local c3 = coef * tsi * a3ovk2 * xnodp * ae * sinio / eo
+  local x1mth2 = 1.0 - theta2
+  local c4 = 2.0 * xnodp * coef1 * aodp * betao2 * (eta * (2.0 + 0.5 * etasq) + eo * (0.5 + 2.0 * etasq) - 2.0 * ck2 * tsi / (aodp * psisq) * 
+  (-3.0 * x3thm1 * (1.0 - 2.0 * eeta + etasq * (1.5 - 0.5 * eeta)) + 0.75 * x1mth2 * (2.0 * etasq - eeta * (1.0 + etasq)) * math.cos((2.0 * omegao))))
+  local c5 = 2.0 * coef1 * aodp * betao2 * (1.0 + 2.75 * (etasq + eeta) + eeta * etasq)
+  local theta4 = theta2 * theta2
+  local temp1 = 3.0 * ck2 * pinvsq * xnodp
+  local temp2 = temp1 * ck2 * pinvsq
+  local temp3 = 1.25 * ck4 * pinvsq * pinvsq * xnodp
+  local xmdot = xnodp + 0.5 * temp1 * betao * x3thm1 + 0.0625 * temp2 * betao * (13.0 - 78.0 * theta2 + 137.0 * theta4)
+  local x1m5th = 1.0 - 5.0 * theta2
+  local omgdot = -0.5 * temp1 * x1m5th + 0.0625 * temp2 * (7.0 - 114.0 * theta2 + 395.0 * theta4) + temp3 * (3.0 - 36.0 * theta2 + 49.0 * theta4)
+  local xhdot1 = -temp1 * cosio
+  local xnodot = xhdot1 + (0.5 * temp2 * (4.0 - 19.0 * theta2) + 2.0 * temp3 * (3.0 - 7.0 * theta2)) * cosio
+  local omgcof = bstar * c3 * math.cos(omegao)
+  local xmcof = -tothrd * coef * bstar * ae / eeta
+  local xnodcf = 3.5 * betao2 * xhdot1 * c1
+  local t2cof = 1.5 * c1
+  local xlcof = 0.125 * a3ovk2 * sinio * (3.0 + 5.0 * cosio) / (1.0 + cosio)
   local aycof = 0.25 * a3ovk2 * sinio;
-  local delmo = math.pow((1.0 + eta * math.cos(xmo)), 3);
+  local delmo = math.pow((1.0 + eta * math.cos(xmo)), 3)
   local sinmo = math.sin(xmo);
-  local x7thm1 = 7.0 * theta2 - 1.0;
+  local x7thm1 = 7.0 * theta2 - 1.0
   local c1sq
   local d2
   local temp
@@ -935,14 +928,14 @@ Orb.SGP4.SetSGP4 = function (omm)
   local t4cof
   local t5cof
   if not(isimp == 1) then
-    c1sq = c1 * c1;
-    d2 = 4.0 * aodp * tsi * c1sq;
-    temp = d2 * tsi * c1 / 3.0;
-    d3 = (17.0 * aodp + s4) * temp;
-    d4 = 0.5 * temp * aodp * tsi * (221.0 * aodp + 31.0 * s4) * c1;
-    t3cof = d2 + 2.0 * c1sq;
-    t4cof = 0.25 * (3.0 * d3 + c1 * (12.0 * d2 + 10.0 * c1sq));
-    t5cof = 0.2 * (3.0 * d4 + 12.0 * c1 * d3 + 6.0 * d2 * d2 + 15.0 * c1sq * (2.0 * d2 + c1sq));
+    c1sq = c1 * c1
+    d2 = 4.0 * aodp * tsi * c1sq
+    temp = d2 * tsi * c1 / 3.0
+    d3 = (17.0 * aodp + s4) * temp
+    d4 = 0.5 * temp * aodp * tsi * (221.0 * aodp + 31.0 * s4) * c1
+    t3cof = d2 + 2.0 * c1sq
+    t4cof = 0.25 * (3.0 * d3 + c1 * (12.0 * d2 + 10.0 * c1sq))
+    t5cof = 0.2 * (3.0 * d4 + 12.0 * c1 * d3 + 6.0 * d2 * d2 + 15.0 * c1sq * (2.0 * d2 + c1sq))
   end
   --set accesser
   return {
@@ -996,53 +989,53 @@ end
 
 Orb.SGP4.RectangularToGeographic = function (time, rect)
 
-  local time = time;
-  local xkm = rect.x;
-  local ykm = rect.y;
-  local zkm = rect.z;
-  local xdotkmps = rect.xdot;
-  local ydotkmps = rect.ydot;
-  local zdotkmps = rect.zdot;
-  local rad = math.pi / 180;
+  local time = time
+  local xkm = rect.x
+  local ykm = rect.y
+  local zkm = rect.z
+  local xdotkmps = rect.xdot
+  local ydotkmps = rect.ydot
+  local zdotkmps = rect.zdot
+  local rad = math.pi / 180
   local gmst = Orb.Time.gst(time)
   local lst = gmst * 15;
   local f = 0.00335277945 --Earth's flattening term in WGS-72 (= 1/298.26)
   local a = 6378.135  --Earth's equational radius in WGS-72 (km)
-  local r = math.sqrt(xkm * xkm + ykm * ykm);
-  local lng = math.atan2(ykm, xkm) / rad - lst;
+  local r = math.sqrt(xkm * xkm + ykm * ykm)
+  local lng = math.atan2(ykm, xkm) / rad - lst
 
   if lng > 360 then 
     lng = lng % 360
   end
 
   if lng < 0 then
-    lng = lng % 360 + 360;
+    lng = lng % 360 + 360
   end
 
   if lng > 180 then
     lng = lng - 360
   end
 
-  local lat = math.atan2(zkm, r);
-  local e2 = f * (2 - f);
+  local lat = math.atan2(zkm, r)
+  local e2 = f * (2 - f)
   local tmp_lat = 0
 
   tmp_lat = lat;
   local sin_lat = math.sin(tmp_lat)
   local c = 1 / math.sqrt(1 - e2 * sin_lat * sin_lat);
-  lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r);
+  lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r)
   
   while math.abs(lat - tmp_lat) > 0.0001 do
 
     tmp_lat = lat;
     sin_lat = math.sin(tmp_lat)
     c = 1 / math.sqrt(1 - e2 * sin_lat * sin_lat);
-    lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r);
+    lat = math.atan2(zkm + a * c * e2 * (math.sin(tmp_lat)), r)
 
   end
 
   local alt = r / math.cos(lat) - a * c;
-  local v = math.sqrt(xdotkmps * xdotkmps + ydotkmps * ydotkmps + zdotkmps * zdotkmps);
+  local v = math.sqrt(xdotkmps * xdotkmps + ydotkmps * ydotkmps + zdotkmps * zdotkmps)
   return {
     longitude = lng,
     latitude = lat / rad,
@@ -1052,10 +1045,56 @@ Orb.SGP4.RectangularToGeographic = function (time, rect)
 end
 
 
+Orb.SGP4.LongitudeLatitude = function(LongitudeLatitude)
+
+  local LongitudeLatitude = math.abs(LongitudeLatitude)
+  local h_LongitudeLatitude = math.floor(LongitudeLatitude)
+  local m_LongitudeLatitude = math.floor((LongitudeLatitude  - h_LongitudeLatitude) * 60)
+  local s_LongitudeLatitude = ((LongitudeLatitude  - h_LongitudeLatitude) * 60 * 60) - (m_LongitudeLatitude * 60)
+
+  if h_LongitudeLatitude > 360 then 
+    h_LongitudeLatitude = h_LongitudeLatitude % 360
+  end
+
+  if h_LongitudeLatitude < 0 then
+    h_LongitudeLatitude = h_LongitudeLatitude % 360 + 360
+  end
+
+  if h_LongitudeLatitude > 180 then
+    h_LongitudeLatitude = h_LongitudeLatitude - 360
+  end
+  h_LongitudeLatitude = math.abs(h_LongitudeLatitude)
+
+  return{
+    h = h_LongitudeLatitude,
+    m = m_LongitudeLatitude,
+    s = s_LongitudeLatitude
+  }
+
+end
+
+
 Orb.SGP4.satellite = function(date, name, tle)
 
   local rect = Orb.SGP4.Exec(date, name, tle)
   local geo = Orb.SGP4.RectangularToGeographic(date, rect)
+
+  local long = Orb.SGP4.LongitudeLatitude(geo.longitude)
+  local lat = Orb.SGP4.LongitudeLatitude(geo.latitude)
+
+  local longitude_EW = "E"
+  local latitude_NS = "N"
+  
+  if geo.longitude <= 0 then
+    latitude_NS = "S"
+  end
+  
+  if geo.latitude <= 0 then
+    longitude_EW = "W"
+  end
+
+  local NS = Orb.ZeroFill(lat.h, 3) .. "˚" .. Orb.ZeroFill(lat.m, 2) .. "'" .. Orb.ZeroFill(lat.s, 2)
+  local EW = Orb.ZeroFill(long.h, 3) .. "˚" .. Orb.ZeroFill(long.m, 2) .. "'" .. Orb.ZeroFill(long.s, 2)
 
   return {
     x = rect.x,
@@ -1067,7 +1106,11 @@ Orb.SGP4.satellite = function(date, name, tle)
     longitude = geo.longitude,
     latitude = geo.latitude,
     altitude = geo.altitude,
-    velocity = geo.velocity
+    velocity = geo.velocity,
+    NS = latitude_NS,
+    EW = longitude_EW,
+    lat = NS,
+    lng = EW
   }
 
 end
