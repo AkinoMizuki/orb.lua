@@ -1,6 +1,15 @@
--- update 2021-07-11 23:00 JST
 
 local Luna = {}
+
+function Luna.info()
+--更新日
+
+  return{
+    name = "Isana, Kashiwai",
+    update = "2021-07-11 23:00 JST",
+  }
+
+end--END_更新日
 
 Luna.latlng =  function (date)
   local rad = math.pi/180;

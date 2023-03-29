@@ -1,8 +1,6 @@
 -- Orb.lua 
 -- partial port of orb.js into lua lang
 -- MIT License / Isana, Kashiwai 2021
--- update 2023-03-27 22:00 JST
-
 -- name space
 
 Orb = {}
@@ -563,8 +561,8 @@ Orb.SGP4.Exec = function (time, name, tle)
   local epoch_array =  Orb.Explode("T", omm.EPOCH)
   local epoch_date = Orb.Explode("-", epoch_array[1])
   local epoch_time = Orb.Explode(":", epoch_array[2])
-  local now_sec = {year = time.year, month = time.month - 1, day = time.day, hour = time.hour, min = time.min, sec = time.sec}
-  local epoch_sec = {year = tonumber(epoch_date[1]), month = tonumber(epoch_date[2]) - 1, day = tonumber(epoch_date[3]), hour = tonumber(epoch_time[1]), min = tonumber(epoch_time[2]), sec = tonumber(epoch_time[3])}
+  local now_sec = {year = time.year, month = time.month , day = time.day, hour = time.hour, min = time.min, sec = time.sec}
+  local epoch_sec = {year = tonumber(epoch_date[1]), month = tonumber(epoch_date[2]) , day = tonumber(epoch_date[3]), hour = tonumber(epoch_time[1]), min = tonumber(epoch_time[2]), sec = tonumber(epoch_time[3])}
   local tsince = (os.time(now_sec) - os.time(epoch_sec)) / 60
 
   local xmo = sgp4.xmo
@@ -1115,5 +1113,17 @@ Orb.SGP4.satellite = function(date, name, tle)
 
 end
 
+function Orb.info()
 
+  local Luna = Orb.Luna.info()
+  local VSOP = Orb.VSOP.info()
+  local Orb = {name = "AkinoMizuki", update = "2023-03-29 23:00 JST"}
+
+  return{
+    Lunainfo = Luna,
+    VSOPinfo = VSOP,
+    Orbinfo = Orb
+  }
+
+end
 return Orb

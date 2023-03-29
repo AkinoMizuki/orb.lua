@@ -3,6 +3,16 @@
 
 local VSOP = {}
 
+function VSOP.info()
+--更新日
+
+  return{
+    name = "Isana, Kashiwai",
+    update = "2021-07-11 23:00 JST",
+  }
+
+end--END_更新日
+
 VSOP.Exec = function(date,terms)
   local rad = math.pi/180;
   local dt = Orb.Time.DeltaT()
