@@ -771,9 +771,16 @@ Orb.SGP4.TLE2OMM = function (date,name, first_line, second_line)
   local year2 = epoch_year
   local epoch_data = {year = year2, month = 1, day = 1, hour = 0, min = 0, sec = 0}
 
-  local epoch_jd = Orb.Time.JD(epoch_data) + (doy)
+  local epoch_jd = Orb.Time.JD(epoch_data) + (doy) -1
   local epoch = Orb.Time.JDToUTC(epoch_jd)
-  local epoch_str = epoch.year .. "-" .. Orb.ZeroFill(epoch.month, 2) .. "-" .. Orb.ZeroFill(epoch.day-1, 2) .. 
+  --print(epoch.year)
+  --print(epoch.month)
+  --print(epoch.day)
+  --print(epoch.hour)
+  --print(epoch.min)
+  --print(epoch.sec)
+
+  local epoch_str = epoch.year .. "-" .. Orb.ZeroFill(epoch.month, 2) .. "-" .. Orb.ZeroFill(epoch.day, 2) .. 
   "T" .. Orb.ZeroFill(epoch.hour, 2) .. ":" .. Orb.ZeroFill(epoch.min, 2) .. ":" .. Orb.ZeroFill(epoch.sec, 2)
 
   local bstar_mantissa = tonumber(line1:sub(54, 59)) * 1e-5;
@@ -1076,7 +1083,6 @@ Orb.SGP4.satellite = function(date, name, tle)
 
   local rect = Orb.SGP4.Exec(date, name, tle)
   local geo = Orb.SGP4.RectangularToGeographic(date, rect)
-
   local long = Orb.SGP4.LongitudeLatitude(geo.longitude)
   local lat = Orb.SGP4.LongitudeLatitude(geo.latitude)
 
@@ -1117,7 +1123,7 @@ function Orb.info()
 
   local Luna = Orb.Luna.info()
   local VSOP = Orb.VSOP.info()
-  local Orb = {name = "AkinoMizuki", update = "2023-03-29 23:00 JST"}
+  local Orb = {name = "AkinoMizuki", update = "2023-04-02 17:00 JST"}
 
   return{
     Lunainfo = Luna,
@@ -1126,4 +1132,5 @@ function Orb.info()
   }
 
 end
+
 return Orb

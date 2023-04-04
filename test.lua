@@ -161,8 +161,8 @@ print("Sun(horizontal)\n  azimuth:" .. sun_horizontal.azimuth .. ", elevation: "
 --satellite
 local name = "ISS (ZARYA)"
 local tle = {
-  first_line = "1 25544U 98067A   23088.46018744  .00049479  00000+0  87606-3 0  9997",
-  second_line = "2 25544  51.6432   3.5570 0005809 146.3940   4.1326 15.49773635389424"
+  first_line = "1 25544U 98067A   23092.03729512  .00023181  00000+0  42160-3 0  9995",
+  second_line = "2 25544  51.6424 345.8486 0007082 143.7445 173.6379 15.49389682389974"
 }
 
 local satellite = Orb.SGP4.satellite(t, name, tle)
