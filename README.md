@@ -7,4 +7,4 @@ lua test.lua
 ```
 
 ## License
-MIT License / Copyright (c) 2021 Isana Kashiwai
+MIT License / Copyright (c) 2021 Isana Kashiwai to Akino Mizuki
