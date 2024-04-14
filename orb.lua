@@ -95,6 +95,7 @@ function Orb.Time.JD(date)
     local tmp = math.floor(year / 100);
     transition_offset = 2 - tmp + math.floor(tmp / 4);
   end
+ 
   return julian_day + transition_offset + time_in_day;
 end
 
@@ -122,7 +123,7 @@ function Orb.Time.JDToUTC(jd)
   local hour = math.floor(h)
   local m = (h - hour)*60
   local min = math.floor(m)
-  local sec = math.floor((m - min)*60)
+  local sec = math.floor(((m - min)*60) + 0.0001)
   
   return {
     year = year,
@@ -656,6 +657,7 @@ Orb.SGP4.Exec = function (time, name, tle)
   local epw
 
   for i = 1, 10 do
+
     sinepw = math.sin(temp2)
     cosepw = math.cos(temp2)
     temp3 = axn * sinepw
@@ -669,7 +671,7 @@ Orb.SGP4.Exec = function (time, name, tle)
     end
 
     temp2 = epw
-    
+
   end
 
   -- short period preliminary quantities
@@ -942,6 +944,7 @@ Orb.SGP4.SetSGP4 = function (omm)
     t4cof = 0.25 * (3.0 * d3 + c1 * (12.0 * d2 + 10.0 * c1sq))
     t5cof = 0.2 * (3.0 * d4 + 12.0 * c1 * d3 + 6.0 * d2 * d2 + 15.0 * c1sq * (2.0 * d2 + c1sq))
   end
+
   --set accesser
   return {
     omm = omm,
@@ -1086,15 +1089,15 @@ Orb.SGP4.satellite = function(date, name, tle)
   local long = Orb.SGP4.LongitudeLatitude(geo.longitude)
   local lat = Orb.SGP4.LongitudeLatitude(geo.latitude)
 
-  local longitude_EW = "W"
+  local longitude_EW = "E"
   local latitude_NS = "N"
   
-  if geo.longitude <= 0 then
+  if geo.latitude <= 0 then
     latitude_NS = "S"
   end
   
-  if geo.latitude <= 0 then
-    longitude_EW = "E"
+  if geo.longitude <= 0 then
+    longitude_EW = "W"
   end
 
   local NS = Orb.ZeroFill(lat.h, 3) .. "˚" .. Orb.ZeroFill(lat.m, 2) .. "'" .. Orb.ZeroFill(lat.s, 2)
